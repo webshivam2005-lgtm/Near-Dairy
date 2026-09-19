@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dairy Partner Portal — Near Dairy</title>
+  <link rel="icon" type="image/svg+xml" href="img/logo-icon.svg">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/support.css">
+</head>
+<body data-role="partner">
+
+  <div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="brand-logo">
+          <img src="img/logo-icon.svg" alt="Near Dairy Logo" class="brand-icon-img">
+          <span class="brand-name"><span class="brand-name-primary">Near</span><span class="brand-name-accent">Dairy</span><span class="brand-name-dot"></span></span>
+        </a>
+        <button class="sidebar-close-btn" data-action="close-sidebar" aria-label="Close Sidebar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div style="padding: 0.75rem 1rem 0;">
+        <span class="role-badge" style="background:#DCFCE7; color:#166534; border-color:#BBF7D0;">Dairy Partner</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="sidebar-item active" data-tab="roster">
+          <i class="fa-solid fa-clipboard-list"></i>
+          <span>Daily Dispatch Roster</span>
+          <span class="sidebar-badge" id="badge-roster-count">0</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="customers">
+          <i class="fa-solid fa-users-viewfinder"></i>
+          <span>Customers & Locations</span>
+          <span class="sidebar-badge" id="badge-partner-cust-count" style="background:#2563EB;">0</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="products">
+          <i class="fa-solid fa-bottle-droplet"></i>
+          <span>Milk Products Catalog</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="subscribers">
+          <i class="fa-solid fa-receipt"></i>
+          <span>Subscriptions & Earnings</span>
+          <span class="sidebar-badge" id="badge-partner-subs" style="background:#16A34A;">0</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="dairy-profile">
+          <i class="fa-solid fa-store"></i>
+          <span>Dairy Storefront & Radius</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="support">
+          <i class="fa-solid fa-headset"></i>
+          <span>Admin Support & Helpdesk</span>
+          <span class="sidebar-badge" id="badge-partner-support" style="background:#DC2626; display:none;">0</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="settings">
+          <i class="fa-solid fa-gear"></i>
+          <span>Account & Security Settings</span>
+        </button>
+
+        <div style="height: 1px; background: var(--color-border); margin: 0.75rem 0;"></div>
+
+        <a href="index.html" target="_blank" class="sidebar-item">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          <span>View Public Storefront</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-widget">
+          <img id="sidebar-user-avatar" src="https://api.dicebear.com/7.x/initials/svg?seed=Dairy" class="user-avatar" alt="Avatar">
+          <div class="user-info">
+            <div class="user-name" id="sidebar-user-name">Ramesh Yadav</div>
+            <div class="user-role-tag" id="sidebar-dairy-name">Partner Dairy</div>
+          </div>
+          <button onclick="Auth.logout()" class="btn btn-icon btn-secondary btn-sm" title="Log Out">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-main">
+      <header class="dashboard-topbar">
+        <div class="dashboard-topbar-left">
+          <button class="mobile-sidebar-toggle-btn" data-action="toggle-sidebar" aria-label="Open Navigation Menu">
+            <i class="fa-solid fa-bars-staggered"></i>
+          </button>
+          <div class="dashboard-page-title">
+            <div class="flex items-center gap-3">
+              <h2 id="topbar-title">Daily Dispatch Roster</h2>
+              <span class="badge badge-success" id="partner-approval-status"><i class="fa-solid fa-check"></i> Approved Partner</span>
+            </div>
+            <p class="text-muted" style="font-size: 0.875rem;">Manage morning & evening milk deliveries, routes, and customer subscriptions.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-topbar-actions flex items-center gap-3">
+          <div class="topbar-utility-group flex items-center gap-2">
+            <div class="translate-widget-slot"></div>
+
+            <!-- Topbar Notification Center -->
+            <div class="notif-wrapper">
+              <button type="button" class="notif-bell-btn" id="btn-partner-notif-bell" title="Notifications & Delivery Alerts">
+                <i class="fa-solid fa-bell"></i>
+                <span class="notif-badge" id="partner-notif-badge" style="display: none;">0</span>
+              </button>
+              <div class="notif-dropdown" id="partner-notif-dropdown">
+                <div class="notif-header">
+                  <div class="notif-title-wrap">
+                    <i class="fa-solid fa-bell" style="color: var(--theme-primary);"></i>
+                    <h4>Notifications</h4>
+                    <span class="badge badge-primary" id="partner-notif-count-pill" style="font-size: 0.72rem; padding: 0.15rem 0.45rem;">0 unread</span>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <button type="button" class="btn btn-ghost btn-sm" id="btn-mark-all-read" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; cursor: pointer;">
+                      <i class="fa-solid fa-check-double"></i> Mark all read
+                    </button>
+                    <button type="button" class="btn btn-ghost btn-sm" id="btn-close-notif-dropdown" style="font-size: 0.85rem; padding: 0.25rem 0.45rem; cursor: pointer; color: var(--color-text-muted);" title="Close">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="notif-tabs">
+                  <button type="button" class="notif-tab-btn active" data-filter="all">All</button>
+                  <button type="button" class="notif-tab-btn" data-filter="pause">⏸ Pauses & Resumes</button>
+                  <button type="button" class="notif-tab-btn" data-filter="orders">🛒 Subscriptions</button>
+                </div>
+                <div class="notif-list" id="partner-notif-list">
+                  <div style="padding: 2.5rem 1rem; text-align: center; color: var(--color-text-muted);">
+                    <i class="fa-solid fa-bell-slash" style="font-size: 1.75rem; margin-bottom: 0.5rem; display: block; opacity: 0.4;"></i>
+                    No new notifications yet
+                  </div>
+                </div>
+                <div class="notif-footer text-muted">
+                  Live delivery alerts & customer pause notifications
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="topbar-action-group flex items-center gap-2">
+            <input type="date" id="roster-date-picker" class="form-input" style="padding: 0.4rem 0.75rem; font-size: 0.875rem;">
+            <button class="btn btn-primary btn-sm" id="btn-add-product-quick">
+              <i class="fa-solid fa-plus"></i> Add Product
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-content-body">
+        <!-- TAB 1: DAILY DISPATCH ROSTER -->
+        <div class="tab-panel active" id="tab-roster">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Total Daily Deliveries</div>
+                <div class="stat-value" id="stat-roster-total">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#F0FDF4; color:#16A34A;"><i class="fa-solid fa-truck"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Morning Slot Deliveries</div>
+                <div class="stat-value" id="stat-roster-morning">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#FFFBEB; color:#D97706;"><i class="fa-solid fa-sun"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Evening Slot Deliveries</div>
+                <div class="stat-value" id="stat-roster-evening">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#EEF2FF; color:#4F46E5;"><i class="fa-solid fa-moon"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Paused Today (Hold)</div>
+                <div class="stat-value" id="stat-roster-paused" style="color: #D97706;">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#FFFBEB; color:#D97706;"><i class="fa-solid fa-circle-pause"></i></div>
+            </div>
+          </div>
+
+          <!-- Morning Window -->
+          <div style="margin-bottom: 2.5rem;">
+            <div class="roster-slot-header" style="background: #FFFBEB; border-color: #D97706;">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-sun" style="color: #D97706;"></i>
+                <span>Morning Dispatch Window (05:30 AM - 07:30 AM)</span>
+              </div>
+              <span class="badge" style="background: #FEF3C7; color: #92400E;" id="count-morning-slot">0 deliveries</span>
+            </div>
+            <div id="morning-roster-list">
+              <!-- Injected via partner.js -->
+            </div>
+          </div>
+
+          <!-- Evening Window -->
+          <div style="margin-bottom: 2.5rem;">
+            <div class="roster-slot-header" style="background: #EEF2FF; border-color: #4F46E5;">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-moon" style="color: #4F46E5;"></i>
+                <span>Evening Dispatch Window (05:30 PM - 07:30 PM)</span>
+              </div>
+              <span class="badge" style="background: #E0E7FF; color: #3730A3;" id="count-evening-slot">0 deliveries</span>
+            </div>
+            <div id="evening-roster-list">
+              <!-- Injected via partner.js -->
+            </div>
+          </div>
+
+          <!-- Paused Window for Today (Vacation / Hold) -->
+          <div>
+            <div class="roster-slot-header" style="background: #FFFBEB; border-color: #FDE68A;">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-pause" style="color: #D97706;"></i>
+                <span>Paused Deliveries for Today (Vacation / Hold) — Do Not Dispatch</span>
+              </div>
+              <span class="badge" style="background: #FEF3C7; color: #92400E;" id="count-paused-slot">0 customers</span>
+            </div>
+            <div id="paused-roster-list">
+              <!-- Injected via partner.js -->
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: CUSTOMERS DIRECTORY & ROUTE DISTANCE DETAILS -->
+        <div class="tab-panel" id="tab-customers">
+          <!-- Summary Metrics Cards -->
+          <div class="stats-grid" style="margin-bottom: 1.75rem;">
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Total Customers</div>
+                <div class="stat-value" id="stat-cust-total">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#EFF6FF; color:#2563EB;"><i class="fa-solid fa-users"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Active Daily Subscribers</div>
+                <div class="stat-value" id="stat-cust-active-subs">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#F0FDF4; color:#16A34A;"><i class="fa-solid fa-circle-check"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Avg. Distance from Dairy</div>
+                <div class="stat-value" id="stat-cust-avg-distance">0.0 km</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#FFFBEB; color:#D97706;"><i class="fa-solid fa-route"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Daily Volume Dispatched</div>
+                <div class="stat-value" id="stat-cust-total-litres">0.0 L</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#FAF5FF; color:#7C3AED;"><i class="fa-solid fa-bottle-droplet"></i></div>
+            </div>
+          </div>
+
+          <!-- Search & Filter Controls -->
+          <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+            <div class="flex items-center justify-between gap-4 flex-wrap">
+              <div class="flex items-center gap-3 flex-1" style="min-width: 280px;">
+                <div style="position: relative; width: 100%;">
+                  <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--color-text-muted);"></i>
+                  <input type="text" id="cust-search-input" class="form-input" placeholder="Search by customer name, phone, society, area, or pincode..." style="padding-left: 2.75rem; width: 100%;">
+                </div>
+              </div>
+              <div class="flex items-center gap-2 flex-wrap" id="cust-filter-group">
+                <button type="button" class="btn btn-secondary btn-sm cust-filter-btn active" data-filter="all">All</button>
+                <button type="button" class="btn btn-secondary btn-sm cust-filter-btn" data-filter="active">Active Subscribers</button>
+                <button type="button" class="btn btn-secondary btn-sm cust-filter-btn" data-filter="nearby">Nearby (&lt; 3 km)</button>
+                <button type="button" class="btn btn-secondary btn-sm cust-filter-btn" data-filter="morning">Morning Slot</button>
+                <button type="button" class="btn btn-secondary btn-sm cust-filter-btn" data-filter="evening">Evening Slot</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer Cards List Container -->
+          <div id="partner-customers-list" class="flex flex-col gap-4">
+            <!-- Injected via partner.js -->
+          </div>
+        </div>
+
+        <!-- TAB 2: MILK PRODUCTS CATALOG -->
+        <div class="tab-panel" id="tab-products">
+          <div class="flex items-center justify-between" style="margin-bottom: 1.5rem;">
+            <div>
+              <h3 style="font-size: 1.25rem;">Milk Variants & Fresh Dairy Catalog</h3>
+              <p class="text-muted">Configure prices, fat percentage, and availability.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openAddProductModal()">
+              <i class="fa-solid fa-plus"></i> Add New Product
+            </button>
+          </div>
+
+          <div class="product-grid" id="partner-products-grid">
+            <!-- Injected via partner.js -->
+          </div>
+        </div>
+
+        <!-- TAB 3: CUSTOMER SUBSCRIBERS -->
+        <div class="tab-panel" id="tab-subscribers">
+          <!-- Financial & Subscription Metrics -->
+          <div class="stats-grid" style="margin-bottom: 1.75rem;">
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Active Subscribers</div>
+                <div class="stat-value" id="stat-partner-sub-count">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#EFF6FF; color:#2563EB;"><i class="fa-solid fa-users"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Monthly Gross Revenue</div>
+                <div class="stat-value" id="stat-partner-gross">₹0.00</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#F0FDF4; color:#16A34A;"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Platform Fees (<span id="partner-fee-rate-label">₹50/sub</span>)</div>
+                <div class="stat-value" style="color: #DC2626;" id="stat-partner-platform-fee">-₹0.00</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#FEF2F2; color:#DC2626;"><i class="fa-solid fa-receipt"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Net Partner Payout</div>
+                <div class="stat-value" style="color: #16A34A;" id="stat-partner-net-payout">₹0.00</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#ECFDF5; color:#059669;"><i class="fa-solid fa-wallet"></i></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header flex items-center justify-between">
+              <div>
+                <h3 style="font-size: 1.125rem;">Active Customer Milk Subscriptions & Earnings</h3>
+                <p class="text-muted" style="font-size: 0.8125rem;">Transparent platform fee deduction of ₹50 per subscription with direct partner settlements.</p>
+              </div>
+              <span class="badge badge-success" id="badge-active-subs-pill">0 Active</span>
+            </div>
+            <div class="card-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Customer</th>
+                      <th>Milk Variant</th>
+                      <th>Qty & Slot</th>
+                      <th>Frequency</th>
+                      <th>Monthly Value</th>
+                      <th>Platform Fee</th>
+                      <th>Net Payout</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="partner-subscribers-tbody">
+                    <!-- Injected via partner.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 5: DAIRY STOREFRONT & RADIUS SETTINGS -->
+        <div class="tab-panel" id="tab-dairy-profile">
+          <div class="card" style="max-width: 860px; margin-bottom: 2rem;">
+            <div class="card-header">
+              <h3 style="font-size: 1.25rem;"><i class="fa-solid fa-store" style="color: var(--theme-primary);"></i> Dairy Partner Profile & Service Area</h3>
+            </div>
+            <div class="card-body">
+              <form id="partner-settings-form">
+                <!-- Owner Profile Section -->
+                <div style="background: #F8FAFC; border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.5rem;">
+                  <h4 style="font-size: 0.9375rem; margin-bottom: 0.75rem; color: var(--color-text);"><i class="fa-solid fa-user-gear"></i> Partner Account Details & Owner Profile</h4>
+                  <div class="avatar-upload-wrap" style="margin-bottom: 1.25rem;">
+                    <div class="avatar-preview-container" id="partner-avatar-trigger" title="Click to upload new avatar">
+                      <img id="partner-setting-avatar-img" src="https://api.dicebear.com/7.x/initials/svg?seed=Dairy" class="avatar-preview-img" alt="Avatar">
+                      <div class="avatar-upload-overlay">
+                        <i class="fa-solid fa-camera"></i>
+                        <span>Change</span>
+                      </div>
+                    </div>
+                    <div class="avatar-meta-info">
+                      <input type="file" id="partner-avatar-file" accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
+                      <input type="hidden" id="partner-avatar-url" value="">
+                      <div class="flex items-center gap-2 flex-wrap" style="margin-bottom: 0.25rem;">
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-partner-choose-avatar">
+                          <i class="fa-solid fa-cloud-arrow-up"></i> Update Photo
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-partner-delete-avatar" style="color: var(--color-danger); display: none;">
+                          <i class="fa-solid fa-trash-can"></i> Remove Photo
+                        </button>
+                      </div>
+                      <span class="text-muted" style="font-size: 0.75rem; word-break: break-word;">Stored securely in Supabase Bucket (Max 5MB)</span>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                      <label class="form-label" for="setting-partner-owner-name">Partner / Owner Full Name <span style="color: var(--color-danger);">*</span></label>
+                      <input type="text" id="setting-partner-owner-name" class="form-input" placeholder="e.g. Ramesh Yadav" required>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="setting-partner-owner-phone">Owner Contact Mobile</label>
+                      <input type="tel" id="setting-partner-owner-phone" class="form-input" placeholder="+91 98192 34567">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Dairy Banner Upload Section -->
+                <div class="form-group">
+                  <label class="form-label">
+                    <span><i class="fa-solid fa-image" style="color: var(--theme-primary);"></i> Dairy Storefront Banner</span>
+                    <span class="text-muted" style="font-size: 0.75rem; font-weight: normal;">(Hero cover banner stored in Supabase)</span>
+                  </label>
+                  <div id="partner-banner-box" class="banner-preview-box">
+                    <img id="partner-banner-img" src="https://images.unsplash.com/photo-1527153857715-3908f2ae5e81?w=800" class="banner-preview-img" alt="Banner">
+                  </div>
+                  <div class="flex items-center gap-3" style="margin-top: 0.5rem; flex-wrap: wrap;">
+                    <input type="file" id="partner-banner-file" accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
+                    <input type="hidden" id="setting-banner-url" value="">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-partner-upload-banner">
+                      <i class="fa-solid fa-cloud-arrow-up"></i> Update Banner
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-partner-delete-banner" style="color: var(--color-danger); display: none;">
+                      <i class="fa-solid fa-trash-can"></i> Remove Banner
+                    </button>
+                    <span class="text-muted" style="font-size: 0.75rem;">High resolution landscape image recommended (Max 10MB)</span>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4" style="margin-top: 1.25rem;">
+                  <div class="form-group">
+                    <label class="form-label" for="setting-dairy-name">Dairy Farm / Store Name</label>
+                    <input type="text" id="setting-dairy-name" class="form-input" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="setting-fssai">FSSAI License Number</label>
+                    <input type="text" id="setting-fssai" class="form-input" required>
+                  </div>
+                </div>
+
+                <!-- Dairy Certificate File Management (Builds Trust) -->
+                <div class="form-group" style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: var(--radius-lg); padding: 1.25rem; margin-top: 0.5rem; margin-bottom: 1.25rem;">
+                  <div class="flex items-center justify-between" style="margin-bottom: 0.75rem;">
+                    <div>
+                      <h4 style="font-size: 0.9375rem; color: #166534; font-weight: 700;">
+                        <i class="fa-solid fa-shield-halved"></i> Dairy Compliance & FSSAI Certificates
+                      </h4>
+                      <p class="text-muted" style="font-size: 0.75rem; margin-top: 0.15rem;">
+                        Stored in Supabase Cloud Bucket. Verified by Admin and showcased to customers.
+                      </p>
+                    </div>
+                    <span class="badge badge-success" id="partner-cert-status-badge"><i class="fa-solid fa-check"></i> Certificate Active</span>
+                  </div>
+
+                  <div id="partner-cert-active-card" class="cert-file-card">
+                    <div class="cert-file-header">
+                      <div class="cert-file-icon" id="partner-cert-icon">
+                        <i class="fa-solid fa-file-pdf"></i>
+                      </div>
+                      <div class="cert-file-info">
+                        <div class="cert-file-name" id="partner-cert-name">FSSAI_License_Certificate.pdf</div>
+                        <div class="cert-file-meta" id="partner-cert-meta">Verified Compliance Document</div>
+                      </div>
+                    </div>
+                    <div class="cert-actions-btns">
+                      <button type="button" class="btn btn-secondary btn-sm" id="btn-partner-view-cert">
+                        <i class="fa-solid fa-eye"></i> View
+                      </button>
+                      <button type="button" class="btn btn-secondary btn-sm" id="btn-partner-replace-cert">
+                        <i class="fa-solid fa-arrows-rotate"></i> Update
+                      </button>
+                      <button type="button" class="btn btn-secondary btn-sm" id="btn-partner-delete-cert" style="color: var(--color-danger);" title="Delete Certificate">
+                        <i class="fa-solid fa-trash-can"></i> Delete
+                      </button>
+                    </div>
+                  </div>
+
+                  <div id="partner-cert-empty-card" style="display: none; text-align: center; padding: 1rem;">
+                    <p class="text-muted" style="font-size: 0.8125rem; margin-bottom: 0.75rem;">No certificate document uploaded yet.</p>
+                    <button type="button" class="btn btn-primary btn-sm" id="btn-partner-upload-cert">
+                      <i class="fa-solid fa-cloud-arrow-up"></i> Upload FSSAI / Quality Certificate (PDF/Image)
+                    </button>
+                  </div>
+
+                  <input type="file" id="partner-cert-file" accept="application/pdf, image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
+                  <input type="hidden" id="setting-cert-url" value="">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="setting-description">Farm Description / Story</label>
+                  <textarea id="setting-description" class="form-textarea" rows="2"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="form-group">
+                    <label class="form-label" for="setting-phone">Contact Phone</label>
+                    <input type="text" id="setting-phone" class="form-input">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="setting-radius">Delivery Radius (km): <strong id="setting-radius-val" style="color: var(--color-success);">10 km</strong></label>
+                    <input type="range" id="setting-radius" min="1" max="25" value="10" style="width: 100%; accent-color: #16A34A;">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="form-group">
+                    <label class="form-label" style="font-weight: 600;"><i class="fa-regular fa-sun" style="color: #D97706; margin-right: 0.35rem;"></i> Morning Delivery Window (12-Hour Slot)</label>
+                    <div class="delivery-slot-container">
+                      <select id="setting-morning-start" class="form-select">
+                        <option value="04:00 AM">04:00 AM</option>
+                        <option value="04:30 AM">04:30 AM</option>
+                        <option value="05:00 AM">05:00 AM</option>
+                        <option value="05:30 AM" selected>05:30 AM</option>
+                        <option value="06:00 AM">06:00 AM</option>
+                        <option value="06:30 AM">06:30 AM</option>
+                        <option value="07:00 AM">07:00 AM</option>
+                        <option value="07:30 AM">07:30 AM</option>
+                        <option value="08:00 AM">08:00 AM</option>
+                        <option value="08:30 AM">08:30 AM</option>
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="09:30 AM">09:30 AM</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="10:30 AM">10:30 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                      </select>
+                      <span class="delivery-slot-divider">to</span>
+                      <select id="setting-morning-end" class="form-select">
+                        <option value="05:00 AM">05:00 AM</option>
+                        <option value="05:30 AM">05:30 AM</option>
+                        <option value="06:00 AM">06:00 AM</option>
+                        <option value="06:30 AM">06:30 AM</option>
+                        <option value="07:00 AM">07:00 AM</option>
+                        <option value="07:30 AM" selected>07:30 AM</option>
+                        <option value="08:00 AM">08:00 AM</option>
+                        <option value="08:30 AM">08:30 AM</option>
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="09:30 AM">09:30 AM</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="10:30 AM">10:30 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="11:30 AM">11:30 AM</option>
+                        <option value="12:00 PM">12:00 PM</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" style="font-weight: 600;"><i class="fa-regular fa-moon" style="color: #4F46E5; margin-right: 0.35rem;"></i> Evening Delivery Window (12-Hour Slot)</label>
+                    <div class="delivery-slot-container">
+                      <select id="setting-evening-start" class="form-select">
+                        <option value="03:00 PM">03:00 PM</option>
+                        <option value="03:30 PM">03:30 PM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="04:30 PM">04:30 PM</option>
+                        <option value="05:00 PM">05:00 PM</option>
+                        <option value="05:30 PM" selected>05:30 PM</option>
+                        <option value="06:00 PM">06:00 PM</option>
+                        <option value="06:30 PM">06:30 PM</option>
+                        <option value="07:00 PM">07:00 PM</option>
+                        <option value="07:30 PM">07:30 PM</option>
+                        <option value="08:00 PM">08:00 PM</option>
+                        <option value="08:30 PM">08:30 PM</option>
+                      </select>
+                      <span class="delivery-slot-divider">to</span>
+                      <select id="setting-evening-end" class="form-select">
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="04:30 PM">04:30 PM</option>
+                        <option value="05:00 PM">05:00 PM</option>
+                        <option value="05:30 PM">05:30 PM</option>
+                        <option value="06:00 PM">06:00 PM</option>
+                        <option value="06:30 PM">06:30 PM</option>
+                        <option value="07:00 PM">07:00 PM</option>
+                        <option value="07:30 PM" selected>07:30 PM</option>
+                        <option value="08:00 PM">08:00 PM</option>
+                        <option value="08:30 PM">08:30 PM</option>
+                        <option value="09:00 PM">09:00 PM</option>
+                        <option value="09:30 PM">09:30 PM</option>
+                        <option value="10:00 PM">10:00 PM</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <div class="flex items-center justify-between flex-wrap gap-2" style="margin-bottom: 0.5rem;">
+                    <label class="form-label" style="margin-bottom: 0;">
+                      <i class="fa-solid fa-location-crosshairs" style="color: var(--theme-primary);"></i> Farm Exact Location on Map (Click or Drag Marker)
+                    </label>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-detect-partner-gps" style="font-size: 0.8125rem;">
+                      <i class="fa-solid fa-crosshairs"></i> Use Live GPS Location
+                    </button>
+                  </div>
+                  <div id="settings-map" style="height: 270px; border-radius: var(--radius-md); border: 1px solid var(--color-border);"></div>
+                  <div class="flex items-center justify-between text-muted" style="font-size: 0.75rem; margin-top: 0.35rem;">
+                    <span><i class="fa-solid fa-circle-info"></i> Pin exact farm location: Full Address, City, State & Pincode are auto-detected.</span>
+                    <span id="partner-coords-display" style="font-family: monospace; color: var(--theme-primary); font-weight: 600;">19.0760° N, 72.8777° E</span>
+                  </div>
+                  <input type="hidden" id="setting-lat" value="19.0760">
+                  <input type="hidden" id="setting-lng" value="72.8777">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="setting-address">Physical Farm Address (Full Street Address) <span style="color: var(--color-danger);">*</span></label>
+                  <textarea id="setting-address" class="form-textarea" rows="2" placeholder="Full Farm Address, Plot/House No, Street, Locality / Village..." required></textarea>
+                </div>
+
+                <!-- Partner Location & Service Area Details (City, State, Pincode) -->
+                <div class="grid grid-cols-3 gap-4" style="margin-top: 1rem; margin-bottom: 0.5rem;">
+                  <div class="form-group">
+                    <label class="form-label" for="setting-city"><i class="fa-solid fa-city" style="color: var(--theme-primary);"></i> City / District <span style="color: var(--color-danger);">*</span></label>
+                    <input type="text" id="setting-city" class="form-input" placeholder="e.g. Pune / Mumbai" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="setting-state"><i class="fa-solid fa-map-location-dot" style="color: var(--theme-primary);"></i> State <span style="color: var(--color-danger);">*</span></label>
+                    <input type="text" id="setting-state" class="form-input" placeholder="e.g. Maharashtra" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="setting-pincode"><i class="fa-solid fa-location-pin" style="color: var(--theme-primary);"></i> Pincode <span style="color: var(--color-danger);">*</span></label>
+                    <input type="text" id="setting-pincode" class="form-input" placeholder="e.g. 411001" maxlength="10" required>
+                  </div>
+                </div>
+
+                <!-- Platform Fee Information Box -->
+                <div class="form-group platform-fee-box" style="background: #FAF5FF; border: 1px solid #E9D5FF; border-radius: var(--radius-lg); padding: 1.25rem; margin-top: 1rem; margin-bottom: 1.25rem; box-sizing: border-box; width: 100%;">
+                  <div class="flex items-start justify-between flex-wrap gap-3">
+                    <div style="flex: 1 1 200px; min-width: 0; width: 100%;">
+                      <h4 style="font-size: 0.9375rem; color: #6B21A8; font-weight: 700; margin-bottom: 0.35rem;">
+                        <i class="fa-solid fa-coins"></i> Partner Platform Fee Tier
+                      </h4>
+                      <p style="font-size: 0.8125rem; color: #7E22CE; line-height: 1.5; margin: 0; word-break: normal; overflow-wrap: break-word;">
+                        Near Dairy charges a flat transparent platform fee of <strong>₹50.00 per active customer subscription</strong>. No hidden percentage commissions, zero listing costs, and customer milk payments are settled directly to you.
+                      </p>
+                    </div>
+                    <span class="badge" style="background: #F3E8FF; color: #6B21A8; font-weight: 800; font-size: 0.875rem; padding: 0.45rem 0.85rem; border: 1px solid #D8B4FE; align-self: flex-start; white-space: nowrap;">
+                      ₹50 / Active Sub
+                    </span>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="btn-save-settings">
+                  <i class="fa-solid fa-floppy-disk"></i> Save Dairy Profile
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 6: ACCOUNT & SECURITY SETTINGS -->
+        <div class="tab-panel" id="tab-settings">
+          
+          <!-- 1. Owner Full Name & Profile Identity -->
+          <div class="settings-section-card">
+            <div class="settings-card-header">
+              <h3><i class="fa-solid fa-user-pen" style="color: #2563EB;"></i> Partner Owner Profile & Full Name</h3>
+              <span class="badge badge-success"><i class="fa-solid fa-id-card"></i> Owner Identity</span>
+            </div>
+            <div class="settings-card-body">
+              <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 1.25rem;">
+                Your full name appears as the verified dairy farm owner on storefront profiles, invoice receipts, and customer milk cards.
+              </p>
+              <form id="form-partner-change-name">
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="form-group">
+                    <label class="form-label" for="settings-partner-fullname">Owner Full Name <span style="color: var(--color-danger);">*</span></label>
+                    <input type="text" id="settings-partner-fullname" class="form-input" placeholder="e.g. Ramesh Yadav" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="settings-partner-phone">Owner Contact Mobile</label>
+                    <input type="tel" id="settings-partner-phone" class="form-input" placeholder="+91 98192 34567">
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between flex-wrap gap-3" style="padding-top: 1rem; border-top: 1px solid var(--color-border); margin-top: 0.5rem;">
+                  <span class="text-muted" style="font-size: 0.78rem;"><i class="fa-solid fa-circle-check" style="color: #16A34A;"></i> Automatically synchronizes across customer storefronts.</span>
+                  <button type="submit" class="btn btn-primary btn-sm" id="btn-partner-update-name">
+                    <i class="fa-solid fa-floppy-disk"></i> Update Owner Name
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 2. Email Address Management -->
+          <div class="settings-section-card">
+            <div class="settings-card-header">
+              <h3><i class="fa-solid fa-envelope" style="color: #2563EB;"></i> Partner Login Email</h3>
+              <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Registered Partner</span>
+            </div>
+            <div class="settings-card-body">
+              <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 1.25rem;">
+                This email address is your primary login credential and receives daily order notifications and payout receipts.
+              </p>
+              <form id="form-partner-change-email">
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="form-group">
+                    <label class="form-label" for="settings-partner-current-email">Current Registered Email</label>
+                    <input type="email" id="settings-partner-current-email" class="form-input" readonly style="background: #F1F5F9; color: var(--color-text);">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="settings-partner-new-email">New Email Address <span style="color: var(--color-danger);">*</span></label>
+                    <input type="email" id="settings-partner-new-email" class="form-input" placeholder="e.g. contact@yourdairy.com" required>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between flex-wrap gap-3" style="padding-top: 1rem; border-top: 1px solid var(--color-border); margin-top: 0.5rem;">
+                  <span class="text-muted" style="font-size: 0.78rem;"><i class="fa-solid fa-shield-halved" style="color: #16A34A;"></i> A fresh session token will be generated automatically upon update.</span>
+                  <button type="submit" class="btn btn-primary btn-sm" id="btn-partner-update-email">
+                    <i class="fa-solid fa-envelope-circle-check"></i> Update Login Email
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 2. Password & Credential Security -->
+          <div class="settings-section-card">
+            <div class="settings-card-header">
+              <h3><i class="fa-solid fa-lock" style="color: #D97706;"></i> Partner Password & Security</h3>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-partner-forgot-password" style="font-size: 0.78rem;">
+                <i class="fa-solid fa-key"></i> Send Reset Link
+              </button>
+            </div>
+            <div class="settings-card-body">
+              <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 1.25rem;">
+                Protect your dairy business dashboard and customer subscription data with a strong password.
+              </p>
+              <form id="form-partner-change-password">
+                <div class="grid grid-cols-3 gap-4">
+                  <div class="form-group">
+                    <label class="form-label" for="settings-partner-current-password">Current Password</label>
+                    <div class="password-input-wrap">
+                      <input type="password" id="settings-partner-current-password" class="form-input" placeholder="••••••••">
+                      <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('settings-partner-current-password', this)">
+                        <i class="fa-regular fa-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="settings-partner-new-password">New Password <span style="color: var(--color-danger);">*</span></label>
+                    <div class="password-input-wrap">
+                      <input type="password" id="settings-partner-new-password" class="form-input" placeholder="Min. 6 characters" minlength="6" required>
+                      <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('settings-partner-new-password', this)">
+                        <i class="fa-regular fa-eye"></i>
+                      </button>
+                    </div>
+                    <div class="password-strength-bar">
+                      <div class="password-strength-fill" id="partner-password-strength-fill"></div>
+                    </div>
+                    <span class="password-strength-text" id="partner-password-strength-text" style="color: var(--color-text-muted);">Strength: None</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="settings-partner-confirm-password">Confirm New Password <span style="color: var(--color-danger);">*</span></label>
+                    <div class="password-input-wrap">
+                      <input type="password" id="settings-partner-confirm-password" class="form-input" placeholder="Re-type new password" minlength="6" required>
+                      <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('settings-partner-confirm-password', this)">
+                        <i class="fa-regular fa-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between flex-wrap gap-3" style="padding-top: 1rem; border-top: 1px solid var(--color-border); margin-top: 0.5rem;">
+                  <span class="text-muted" style="font-size: 0.78rem;"><i class="fa-solid fa-lock" style="color: #2563EB;"></i> Encrypted credential authentication.</span>
+                  <button type="submit" class="btn btn-primary btn-sm" id="btn-partner-update-password">
+                    <i class="fa-solid fa-circle-check"></i> Save New Password
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 3. Dispatch & Business Notification Preferences -->
+          <div class="settings-section-card">
+            <div class="settings-card-header">
+              <h3><i class="fa-solid fa-bell" style="color: #7C3AED;"></i> Dispatch & Business Notification Alerts</h3>
+              <span class="badge badge-success">Instant Alerts</span>
+            </div>
+            <div class="settings-card-body">
+              <form id="form-partner-notification-prefs">
+                <div class="toggle-switch-wrap">
+                  <div class="toggle-switch-label-group">
+                    <div class="toggle-switch-icon" style="background:#F0FDF4; color:#16A34A;">
+                      <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div>
+                      <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">WhatsApp New Subscription Alert</div>
+                      <div class="text-muted" style="font-size: 0.8125rem;">Receive an instant notification whenever a new customer subscribes to your milk delivery.</div>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="partner-pref-whatsapp" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-switch-wrap">
+                  <div class="toggle-switch-label-group">
+                    <div class="toggle-switch-icon" style="background:#FFFBEB; color:#D97706;">
+                      <i class="fa-solid fa-sun"></i>
+                    </div>
+                    <div>
+                      <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">5:00 AM Morning Dispatch Alarm</div>
+                      <div class="text-muted" style="font-size: 0.8125rem;">Automated reminder to review route roster and start morning milk deliveries on time.</div>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="partner-pref-morning" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-switch-wrap">
+                  <div class="toggle-switch-label-group">
+                    <div class="toggle-switch-icon" style="background:#EFF6FF; color:#2563EB;">
+                      <i class="fa-solid fa-money-bill-transfer"></i>
+                    </div>
+                    <div>
+                      <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">Payout & Subscription Renewal Notices</div>
+                      <div class="text-muted" style="font-size: 0.8125rem;">Receive instant confirmation when customer monthly subscriptions renew.</div>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="partner-pref-payouts" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+
+                <div class="flex items-center justify-end" style="padding-top: 1.25rem; margin-top: 0.5rem;">
+                  <button type="submit" class="btn btn-secondary btn-sm" id="btn-partner-save-prefs">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Alert Settings
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 4. Active Sessions -->
+          <div class="settings-section-card">
+            <div class="settings-card-header flex items-center justify-between" style="flex-wrap: wrap; gap: 0.75rem;">
+              <h3 style="margin: 0;"><i class="fa-solid fa-laptop-code" style="color: #0284C7;"></i> Connected Devices & Sessions</h3>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-partner-logout-all" style="color: var(--color-danger); border-color: #FECACA; white-space: nowrap; flex-shrink: 0;">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out Other Devices
+              </button>
+            </div>
+            <div class="settings-card-body">
+              <div class="session-device-item">
+                <div class="session-device-info">
+                  <div class="session-device-icon">
+                    <i class="fa-solid fa-desktop"></i>
+                  </div>
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">Chrome on Windows</div>
+                    <div class="text-muted" style="font-size: 0.78rem;">Current Active Session • Pune, Maharashtra</div>
+                  </div>
+                </div>
+                <span class="badge badge-success" style="font-size: 0.72rem;"><i class="fa-solid fa-circle"></i> Active Now</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Danger Zone -->
+          <div class="settings-section-card" style="border-color: #FECACA;">
+            <div class="settings-card-header" style="background: #FEF2F2; border-color: #FECACA;">
+              <h3 style="color: #DC2626;"><i class="fa-solid fa-triangle-exclamation"></i> Dairy Operations Status</h3>
+            </div>
+            <div class="settings-card-body">
+              <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">Pause Storefront / Temporarily Stop New Subscriptions</div>
+                  <div class="text-muted" style="font-size: 0.8125rem;">Hide your dairy from search discovery during farm maintenance or vacation without deleting your account.</div>
+                </div>
+                <button type="button" class="btn btn-danger btn-sm" id="btn-partner-pause-dairy">
+                  <i class="fa-solid fa-pause"></i> Pause Dairy Listing
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB: ADMIN SUPPORT & HELPDESK -->
+        <div class="tab-panel" id="tab-support">
+          <div class="flex items-center justify-between flex-wrap gap-4" style="margin-bottom: 1.5rem;">
+            <div>
+              <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">
+                <i class="fa-solid fa-headset" style="color: #16A34A;"></i> Dairy Partner Helpdesk & Admin Support
+              </h3>
+              <p class="text-muted" style="font-size: 0.875rem;">
+                Direct two-way messaging with Near Dairy administrators for payment settlements, customer disputes, and operational assistance.
+              </p>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" id="btn-partner-open-new-ticket" style="background: #16A34A; border-color: #16A34A; white-space: nowrap; flex-shrink: 0;">
+              <i class="fa-solid fa-paper-plane"></i> Raise New Ticket
+            </button>
+          </div>
+
+          <!-- Partner Support Highlights Grid -->
+          <div class="grid grid-cols-3 gap-4" style="margin-bottom: 1.5rem;">
+            <div class="card" style="padding: 1.25rem; background: #F0FDF4; border-color: #BBF7D0;">
+              <div class="flex items-center gap-3" style="margin-bottom: 0.5rem;">
+                <div class="stat-icon-wrap" style="width: 36px; height: 36px; font-size: 1rem; background: #DCFCE7; color: #166534;">
+                  <i class="fa-solid fa-coins"></i>
+                </div>
+                <h4 style="font-size: 0.9375rem; font-weight: 700; color: #166534;">Payouts & Settlements</h4>
+              </div>
+              <p class="text-muted" style="font-size: 0.8125rem; line-height: 1.45;">
+                Inquiries regarding the ₹50.00 platform fee deductions, Razorpay automated bank transfers, or weekly statements.
+              </p>
+            </div>
+
+            <div class="card" style="padding: 1.25rem; background: #EFF6FF; border-color: #BFDBFE;">
+              <div class="flex items-center gap-3" style="margin-bottom: 0.5rem;">
+                <div class="stat-icon-wrap" style="width: 36px; height: 36px; font-size: 1rem; background: #DBEAFE; color: #1D4ED8;">
+                  <i class="fa-solid fa-truck-fast"></i>
+                </div>
+                <h4 style="font-size: 0.9375rem; font-weight: 700; color: #1D4ED8;">Dispatch & Delivery Zones</h4>
+              </div>
+              <p class="text-muted" style="font-size: 0.8125rem; line-height: 1.45;">
+                Expanding delivery radius, adjusting morning/evening delivery time slots, or reporting road transit issues.
+              </p>
+            </div>
+
+            <div class="card" style="padding: 1.25rem; background: #FAF5FF; border-color: #E9D5FF;">
+              <div class="flex items-center gap-3" style="margin-bottom: 0.5rem;">
+                <div class="stat-icon-wrap" style="width: 36px; height: 36px; font-size: 1rem; background: #F3E8FF; color: #7C3AED;">
+                  <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h4 style="font-size: 0.9375rem; font-weight: 700; color: #7C3AED;">FSSAI & Verification</h4>
+              </div>
+              <p class="text-muted" style="font-size: 0.8125rem; line-height: 1.45;">
+                Updates to food safety certificates, lab testing reports, or store badge re-verifications.
+              </p>
+            </div>
+          </div>
+
+          <!-- Partner Support Tickets Stream Container -->
+          <div class="card">
+            <div class="card-header flex items-center justify-between" style="flex-wrap: wrap; gap: 0.75rem;">
+              <div style="flex: 1; min-width: 200px;">
+                <h3 style="font-size: 1.125rem; font-weight: 700;">Your Support Tickets & Active Conversations</h3>
+                <span class="text-muted" style="font-size: 0.78rem;">Click any ticket to open live chat with platform administrators</span>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-partner-refresh-support" style="white-space: nowrap; flex-shrink: 0;">
+                <i class="fa-solid fa-rotate-right"></i> Refresh Tickets
+              </button>
+            </div>
+            <div class="card-body" style="padding: 1.25rem;">
+              <div class="support-tickets-grid" id="partner-tickets-list">
+                <div class="text-center text-muted" style="padding: 2rem; grid-column: 1 / -1;">
+                  <div class="spinner" style="width: 24px; height: 24px; margin: 0 auto 0.75rem;"></div>
+                  Loading your support conversations...
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: CERTIFICATE VIEWER / INSPECTOR -->
+  <div class="modal-overlay" id="cert-viewer-modal">
+    <div class="modal-container" style="max-width: 800px;">
+      <div class="modal-header">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-circle-check" style="color: #16A34A; font-size: 1.25rem;"></i>
+          <h3 class="modal-title" id="cert-modal-title">Dairy Certificate & FSSAI Verification</h3>
+        </div>
+        <button class="modal-close-btn" onclick="Modal.close('cert-viewer-modal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 1.25rem;">
+        <div class="cert-preview-frame-wrap" id="cert-viewer-frame-container">
+          <!-- Injected via JS (iframe or img) -->
+        </div>
+        <div class="cert-verify-grid">
+          <div class="cert-verify-item">
+            <i class="fa-solid fa-circle-check"></i>
+            <div>
+              <div style="font-weight: 700; font-size: 0.8125rem;">FSSAI Compliance</div>
+              <div class="text-muted" style="font-size: 0.75rem;">Valid Food Safety License</div>
+            </div>
+          </div>
+          <div class="cert-verify-item">
+            <i class="fa-solid fa-cow"></i>
+            <div>
+              <div style="font-weight: 700; font-size: 0.8125rem;">Producer Verified</div>
+              <div class="text-muted" style="font-size: 0.75rem;">Direct Farm Sourcing</div>
+            </div>
+          </div>
+          <div class="cert-verify-item">
+            <i class="fa-solid fa-shield-heart"></i>
+            <div>
+              <div style="font-weight: 700; font-size: 0.8125rem;">Trust Guaranteed</div>
+              <div class="text-muted" style="font-size: 0.75rem;">Near Dairy Audited</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a id="btn-cert-download" href="#" target="_blank" download class="btn btn-secondary btn-sm">
+          <i class="fa-solid fa-download"></i> Download Document
+        </a>
+        <button class="btn btn-primary btn-sm" onclick="Modal.close('cert-viewer-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT PRODUCT -->
+  <div class="modal-overlay" id="product-modal">
+    <div class="modal-container" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="product-modal-title">Add Milk Product</h3>
+        <button class="modal-close-btn" onclick="Modal.close('product-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="product-form">
+          <input type="hidden" id="prod-id">
+
+          <div class="form-group">
+            <label class="form-label" for="prod-name">Product Name</label>
+            <input type="text" id="prod-name" class="form-input" placeholder="e.g. Farm Fresh Raw Cow Milk" required>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="form-group" style="grid-column: span 1;">
+              <label class="form-label" for="prod-milk-type">Milk Category</label>
+              <select id="prod-milk-type" class="form-select" required>
+                <option value="Cow Milk">Cow Milk</option>
+                <option value="A2 Milk">Vedic A2 Gir Milk</option>
+                <option value="Buffalo Milk">Buffalo Milk</option>
+                <option value="Paneer">Fresh Paneer</option>
+                <option value="Ghee">Desi Ghee</option>
+                <option value="Curd">Set Curd / Dahi</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="grid-column: span 1;">
+              <label class="form-label" for="prod-price">Price (₹)</label>
+              <input type="number" step="0.5" id="prod-price" class="form-input" placeholder="62" required>
+            </div>
+
+            <div class="form-group" style="grid-column: span 1;">
+              <label class="form-label" for="prod-unit">Unit</label>
+              <select id="prod-unit" class="form-select">
+                <option value="Litre">Litre</option>
+                <option value="500 ml">500 ml</option>
+                <option value="kg">kg</option>
+                <option value="Pack">Pack</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="form-label" for="prod-fat">Fat Content (%)</label>
+              <input type="number" step="0.1" id="prod-fat" class="form-input" placeholder="4.5">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prod-snf">SNF Content (%)</label>
+              <input type="number" step="0.1" id="prod-snf" class="form-input" placeholder="8.5">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prod-desc">Description</label>
+            <textarea id="prod-desc" class="form-textarea" rows="2" placeholder="Fresh and natural raw cow milk collected from healthy cows..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Product Photo</label>
+            <div class="flex items-center gap-3" style="margin-bottom: 0.5rem;">
+              <input type="file" id="prod-image-file" accept="image/*" style="display: none;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('prod-image-file').click()">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Photo
+              </button>
+              <span id="prod-file-status" class="text-muted" style="font-size: 0.8125rem;">or enter image link below</span>
+            </div>
+            <input type="url" id="prod-image" class="form-input" placeholder="https://images.unsplash.com/photo-...">
+            <div id="prod-image-preview-wrap" style="margin-top: 0.75rem; display: none; text-align: center; background: #F8FAFC; border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 0.5rem;">
+              <img id="prod-image-preview" src="" alt="Product Preview" style="max-height: 140px; width: 100%; object-fit: cover; border-radius: var(--radius-md);">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Modal.close('product-modal')">Cancel</button>
+        <button class="btn btn-primary" id="btn-save-product">Save Product</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CUSTOMER ROUTE & GPS MAP INSPECTOR -->
+  <div class="modal-overlay" id="customer-map-modal">
+    <div class="modal-container" style="max-width: 780px;">
+      <div class="modal-header">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-map-location-dot" style="color: var(--theme-primary); font-size: 1.25rem;"></i>
+          <h3 class="modal-title" id="cust-modal-title">Customer Delivery Location & Route</h3>
+        </div>
+        <button class="modal-close-btn" onclick="Modal.close('customer-map-modal')">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.25rem;">
+        <div id="cust-route-map" style="height: 320px; border-radius: var(--radius-lg); border: 1px solid var(--color-border); margin-bottom: 1.25rem; z-index: 1;"></div>
+
+        <div class="grid grid-cols-2 gap-4" style="margin-bottom: 1rem;">
+          <div class="card" style="padding: 1rem; background: var(--theme-bg);">
+            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 0.35rem;">
+              <i class="fa-solid fa-store" style="color: var(--theme-primary);"></i> Dispatch Origin
+            </div>
+            <div id="cust-modal-dairy-name" style="font-weight: 700; font-size: 0.9375rem;">Dairy Farm</div>
+            <div id="cust-modal-dairy-address" class="text-muted" style="font-size: 0.8125rem;">Dairy physical address</div>
+          </div>
+
+          <div class="card" style="padding: 1rem; background: #F0FDF4; border-color: #BBF7D0;">
+            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #166534; margin-bottom: 0.35rem;">
+              <i class="fa-solid fa-house" style="color: #16A34A;"></i> Delivery Destination
+            </div>
+            <div id="cust-modal-cust-name" style="font-weight: 700; font-size: 0.9375rem; color: #166534;">Customer Name</div>
+            <div id="cust-modal-cust-address" style="font-size: 0.8125rem; color: #15803D;">Customer flat / building</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding: 1rem; background: #FFFBEB; border-color: #FDE68A; margin-bottom: 1rem;">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-route" style="color: #D97706; font-size: 1.25rem;"></i>
+              <div>
+                <div style="font-weight: 700; font-size: 0.9375rem; color: #92400E;">Calculated Delivery Distance</div>
+                <div class="text-muted" style="font-size: 0.75rem;">Direct distance from your dairy farm gate</div>
+              </div>
+            </div>
+            <span class="badge" style="background: #FEF3C7; color: #92400E; font-size: 1rem; font-weight: 800; padding: 0.4rem 0.85rem;" id="cust-modal-distance-badge">
+              1.2 km
+            </span>
+          </div>
+        </div>
+
+        <div id="cust-modal-instructions-box" class="card" style="padding: 0.875rem 1rem; background: #F8FAFC; border-color: var(--color-border);">
+          <div style="font-weight: 700; font-size: 0.8125rem; color: var(--color-text); margin-bottom: 0.25rem;">
+            <i class="fa-solid fa-bell-concierge" style="color: var(--theme-primary);"></i> Delivery Instructions for Dispatch Boy:
+          </div>
+          <div id="cust-modal-instructions" style="font-size: 0.875rem; color: var(--color-text-muted);">Leave in milk bag on door handle</div>
+        </div>
+      </div>
+
+      <div class="modal-footer flex items-center justify-between">
+        <a id="btn-cust-modal-directions" href="#" target="_blank" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-diamond-turn-right"></i> Open Live Google Maps Navigation
+        </a>
+        <button class="btn btn-secondary btn-sm" onclick="Modal.close('customer-map-modal')">Close Map</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PARTNER RAISE NEW TICKET TO ADMIN -->
+  <div class="modal-overlay" id="modal-partner-new-ticket">
+    <div class="modal-container" style="max-width: 560px;">
+      <div class="modal-header">
+        <div class="flex items-center gap-2">
+          <div class="stat-icon-wrap" style="width: 34px; height: 34px; font-size: 0.95rem; background: #DCFCE7; color: #166534;">
+            <i class="fa-solid fa-headset"></i>
+          </div>
+          <div>
+            <h3 class="modal-title" style="margin-bottom: 0;">Raise Ticket to Admin Support</h3>
+            <p class="text-muted" style="font-size: 0.78rem; margin: 0;">Our platform operations team will respond promptly in live chat.</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="Modal.close('modal-partner-new-ticket')">&times;</button>
+      </div>
+      <form id="form-partner-new-ticket">
+        <div class="modal-body" style="padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 0.8125rem;">Problem Category <span style="color: var(--color-danger);">*</span></label>
+              <select id="partner-ticket-category" class="form-select" required>
+                <option value="payout">💰 Payouts & Platform Fees</option>
+                <option value="dispatch">🚚 Daily Delivery & Logistics</option>
+                <option value="quality">⚠️ Customer Dispute / Complaint</option>
+                <option value="verification">🛡️ FSSAI License & Storefront</option>
+                <option value="technical">⚙️ Account & App Technical Issue</option>
+                <option value="general">💬 Other General Inquiry</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 0.8125rem;">Urgency Level</label>
+              <select id="partner-ticket-priority" class="form-select">
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+                <option value="high">High (Urgent Attention)</option>
+                <option value="urgent">⚡ Critical Dispatch Emergency</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.8125rem;">Subject / Brief Summary <span style="color: var(--color-danger);">*</span></label>
+            <input type="text" id="partner-ticket-subject" class="form-input" placeholder="e.g. Question regarding monthly platform fee settlement" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.8125rem;">Detailed Description <span style="color: var(--color-danger);">*</span></label>
+            <textarea id="partner-ticket-message" class="form-textarea" rows="3" placeholder="Explain the problem or question in detail..." required></textarea>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.8125rem;">Attachment / Screenshot (Optional)</label>
+            <input type="file" id="partner-ticket-attachment" class="form-input" accept="image/*, application/pdf">
+          </div>
+
+        </div>
+        <div class="modal-footer flex items-center justify-between">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="Modal.close('modal-partner-new-ticket')">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="btn-partner-submit-ticket" style="background: #16A34A; border-color: #16A34A;">
+            <i class="fa-solid fa-paper-plane"></i> Submit Support Ticket
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: PARTNER LIVE CHAT CONSOLE WITH ADMIN -->
+  <div class="modal-overlay" id="modal-partner-chat">
+    <div class="modal-container" style="max-width: 780px; height: 85vh; display: flex; flex-direction: column;">
+      
+      <!-- Chat Header -->
+      <div class="modal-header" style="border-bottom: 1px solid var(--color-border); padding: 1rem 1.25rem;">
+        <div class="flex items-center gap-3">
+          <div class="stat-icon-wrap" style="width: 40px; height: 40px; font-size: 1.1rem; background: #FAF5FF; color: #7C3AED;">
+            <i class="fa-solid fa-user-shield"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="modal-title" id="partner-chat-ticket-title" style="margin-bottom: 0; font-size: 1.05rem;">Support Conversation</h3>
+              <span id="partner-chat-ticket-num" class="ticket-number-badge">TKT-1001</span>
+              <span id="partner-chat-status-badge" class="ticket-status-pill status-open">Open</span>
+            </div>
+            <p class="text-muted" id="partner-chat-admin-subtitle" style="font-size: 0.78rem; margin: 0;">Near Dairy Operations & Admin Desk</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="Modal.close('modal-partner-chat')">&times;</button>
+      </div>
+
+      <!-- Chat Context Bar -->
+      <div class="chat-context-bar" style="padding: 0.45rem 1.25rem;">
+        <div class="chat-context-item">
+          <i class="fa-solid fa-tag" style="color: var(--theme-primary);"></i>
+          <span>Category: <strong id="partner-chat-category">General</strong></span>
+        </div>
+        <div class="chat-context-item">
+          <i class="fa-solid fa-flag" style="color: #DC2626;"></i>
+          <span>Priority: <strong id="partner-chat-priority">Medium</strong></span>
+        </div>
+        <div class="chat-context-item">
+          <i class="fa-solid fa-clock" style="color: var(--color-text-muted);"></i>
+          <span>Opened: <strong id="partner-chat-created">Today</strong></span>
+        </div>
+      </div>
+
+      <!-- Chat Messages Stream -->
+      <div class="chat-messages-stream" id="partner-chat-messages-stream" style="flex: 1; overflow-y: auto;">
+        <!-- Injected via partner.js -->
+      </div>
+
+      <!-- Quick Canned Replies for Partner -->
+      <div class="quick-canned-bar" style="padding: 0.4rem 1rem;">
+        <span class="text-muted" style="font-size: 0.72rem; font-weight: 700; white-space: nowrap;"><i class="fa-solid fa-bolt" style="color: #16A34A;"></i> Quick Reply:</span>
+        <button type="button" class="canned-chip" data-target="partner-chat-input" data-text="Thank you! We will adjust our morning delivery route accordingly.">🥛 Route adjusted</button>
+        <button type="button" class="canned-chip" data-target="partner-chat-input" data-text="I have contacted the customer directly and delivered the replacement bottle.">✓ Issue settled with customer</button>
+        <button type="button" class="canned-chip" data-target="partner-chat-input" data-text="Could you please verify our updated bank details for payout?">💳 Verify bank details</button>
+        <button type="button" class="canned-chip" data-target="partner-chat-input" data-text="Understood. Please let us know if any further document is needed.">👍 Document ready</button>
+      </div>
+
+      <!-- Chat Composer Box -->
+      <div class="helpdesk-chat-composer" style="padding: 0.75rem 1rem;">
+        <form id="form-partner-chat-composer">
+          <div id="partner-attachment-preview" class="composer-attachment-preview" style="display: none;">
+            <i class="fa-solid fa-paperclip" style="color: #16A34A;"></i>
+            <span id="partner-attachment-name" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">file.jpg</span>
+            <button type="button" id="btn-partner-remove-attachment" style="border: none; background: transparent; cursor: pointer; color: var(--color-danger); font-size: 0.85rem;">&times;</button>
+          </div>
+
+          <div class="composer-input-row">
+            <textarea id="partner-chat-input" class="composer-textarea" rows="1" placeholder="Type a reply to Near Dairy Support... (Press Enter to Send)"></textarea>
+            
+            <div class="composer-actions">
+              <input type="file" id="partner-chat-file-input" style="display: none;" accept="image/*, application/pdf">
+              <button type="button" class="btn btn-secondary btn-icon" id="btn-partner-choose-file" title="Attach Receipt / Image" style="width: 42px; height: 42px;">
+                <i class="fa-solid fa-paperclip"></i>
+              </button>
+              <button type="submit" class="btn-composer-send" id="btn-partner-send-msg" title="Send Message" style="background: #16A34A;">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Sidebar Backdrop Overlay -->
+  <div class="sidebar-backdrop-overlay" data-action="close-sidebar"></div>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav">
+    <button class="mobile-bottom-nav-item active" data-tab="roster">
+      <i class="fa-solid fa-clipboard-list"></i>
+      <span>Roster</span>
+    </button>
+    <button class="mobile-bottom-nav-item" data-tab="customers">
+      <i class="fa-solid fa-users"></i>
+      <span>Customers</span>
+    </button>
+    <button class="mobile-bottom-nav-item" data-tab="products">
+      <i class="fa-solid fa-bottle-droplet"></i>
+      <span>Products</span>
+    </button>
+    <button class="mobile-bottom-nav-item" data-tab="subscribers">
+      <i class="fa-solid fa-receipt"></i>
+      <span>Earnings</span>
+    </button>
+    <button class="mobile-bottom-nav-item" data-tab="support">
+      <i class="fa-solid fa-headset"></i>
+      <span>Support</span>
+    </button>
+  </nav>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/translator.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/partner.js"></script>
+</body>
+</html>

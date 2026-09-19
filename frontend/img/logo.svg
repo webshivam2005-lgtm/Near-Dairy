@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 76" width="100%" height="100%" fill="none">
+  <defs>
+    <!-- Background Gradient for Icon -->
+    <linearGradient id="logoBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E40AF"/>
+      <stop offset="50%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+
+    <!-- Organic Leaf Gradient -->
+    <linearGradient id="logoLeafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <!-- Wordmark Dairy Gradient -->
+    <linearGradient id="dairyTextGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+
+    <!-- Sparkle Gold -->
+    <linearGradient id="logoGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+
+    <!-- Drop Shadow for Icon -->
+    <filter id="logoIconShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#1E40AF" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- ================= ICON BADGE (48x48 inside 0-60) ================= -->
+  <g transform="translate(6, 6)" filter="url(#logoIconShadow)">
+    <!-- Squircle Base (64x64) -->
+    <rect width="64" height="64" rx="19" fill="url(#logoBgGrad)"/>
+
+    <!-- Cow Silhouette & Milk Drop Fusion -->
+    <!-- Left Horn & Ear -->
+    <path d="M19 24 C14 21, 12 15, 16 12 C20 15, 23 19, 24 24 Z" fill="#FFFFFF" opacity="0.95"/>
+    <ellipse cx="15" cy="27" rx="5.5" ry="3.2" transform="rotate(-25 15 27)" fill="#FFFFFF" opacity="0.9"/>
+    
+    <!-- Right Horn & Ear -->
+    <path d="M45 24 C50 21, 52 15, 48 12 C44 15, 41 19, 40 24 Z" fill="#FFFFFF" opacity="0.95"/>
+    <ellipse cx="49" cy="27" rx="5.5" ry="3.2" transform="rotate(25 49 27)" fill="#FFFFFF" opacity="0.9"/>
+
+    <!-- Pure Milk Drop (Forms Head) -->
+    <path d="M32 12 C25 21, 17 30, 17 41 C17 50, 24 56, 32 56 C40 56, 47 50, 47 41 C47 30, 39 21, 32 12 Z" fill="#FFFFFF"/>
+
+    <!-- Eyes -->
+    <circle cx="26" cy="32" r="2" fill="#1E293B"/>
+    <circle cx="38" cy="32" r="2" fill="#1E293B"/>
+    <circle cx="26.5" cy="31.5" r="0.7" fill="#FFFFFF"/>
+    <circle cx="38.5" cy="31.5" r="0.7" fill="#FFFFFF"/>
+
+    <!-- Muzzle / Snout -->
+    <ellipse cx="32" cy="43" rx="9" ry="6.8" fill="#F1F5F9"/>
+    <ellipse cx="29" cy="42" rx="1.2" ry="1.6" fill="#64748B"/>
+    <ellipse cx="35" cy="42" rx="1.2" ry="1.6" fill="#64748B"/>
+    <path d="M29 46.5 Q32 49 35 46.5" stroke="#64748B" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+
+    <!-- Organic Sprout on Forehead -->
+    <path d="M32 25 C30 21, 25 22, 27 27 C29 26, 31 25.5, 32 25 Z" fill="url(#logoLeafGrad)"/>
+    <path d="M32 25 C34 21, 39 22, 37 27 C35 26, 33 25.5, 32 25 Z" fill="url(#logoLeafGrad)"/>
+
+    <!-- Golden Quality Sparkle -->
+    <path d="M52 10 L53 13 L56 14 L53 15 L52 18 L51 15 L48 14 L51 13 Z" fill="url(#logoGoldGrad)"/>
+  </g>
+
+  <!-- ================= TYPOGRAPHY WORDMARK ================= -->
+  <g transform="translate(84, 0)">
+    <!-- "Near" in bold slate -->
+    <text x="0" y="44" font-family="'Plus Jakarta Sans', 'Outfit', 'Inter', system-ui, sans-serif" font-weight="900" font-size="34" fill="#0F172A" letter-spacing="-0.03em">Near</text>
+    
+    <!-- "Dairy" in vibrant brand gradient blue -->
+    <text x="82" y="44" font-family="'Plus Jakarta Sans', 'Outfit', 'Inter', system-ui, sans-serif" font-weight="900" font-size="34" fill="url(#dairyTextGrad)" letter-spacing="-0.03em">Dairy</text>
+
+    <!-- Little organic green dot / leaf on the i -->
+    <circle cx="160" cy="23" r="3.2" fill="#10B981"/>
+
+    <!-- Modern subline slogan -->
+    <text x="1" y="62" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-weight="700" font-size="10.5" fill="#64748B" letter-spacing="0.16em">FRESH FARM MILK • DIRECT</text>
+  </g>
+</svg>

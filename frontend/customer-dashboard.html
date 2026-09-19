@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Portal — Near Dairy</title>
+  <link rel="icon" type="image/svg+xml" href="img/logo-icon.svg">
+
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/support.css">
+</head>
+<body data-role="customer">
+
+  <div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="brand-logo">
+          <img src="img/logo-icon.svg" alt="Near Dairy Logo" class="brand-icon-img">
+          <span class="brand-name"><span class="brand-name-primary">Near</span><span class="brand-name-accent">Dairy</span><span class="brand-name-dot"></span></span>
+        </a>
+        <button class="sidebar-close-btn" data-action="close-sidebar" aria-label="Close Sidebar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div style="padding: 0.75rem 1rem 0;">
+        <span class="role-badge">Customer Portal</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="sidebar-item active" data-tab="subscriptions">
+          <i class="fa-solid fa-calendar-check"></i>
+          <span>My Subscriptions</span>
+          <span class="sidebar-badge" id="badge-subs-count">0</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="orders">
+          <i class="fa-solid fa-truck-fast"></i>
+          <span>Daily Orders & Tracking</span>
+          <span class="sidebar-badge" id="badge-orders-count" style="background:#475569;">0</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="complaints">
+          <i class="fa-solid fa-headset"></i>
+          <span>Support & Live Help</span>
+          <span class="sidebar-badge" id="badge-customer-support" style="background:#DC2626; display:none;">0</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="profile">
+          <i class="fa-solid fa-map-location-dot"></i>
+          <span>Delivery Address & Location</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="settings">
+          <i class="fa-solid fa-gear"></i>
+          <span>Account & Security Settings</span>
+        </button>
+
+        <div style="height: 1px; background: var(--color-border); margin: 0.75rem 0;"></div>
+
+        <a href="index.html" class="sidebar-item">
+          <i class="fa-solid fa-magnifying-glass-location"></i>
+          <span>Find More Dairies</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-widget">
+          <img id="sidebar-user-avatar" src="https://api.dicebear.com/7.x/initials/svg?seed=User" class="user-avatar" alt="Avatar">
+          <div class="user-info">
+            <div class="user-name" id="sidebar-user-name">Customer</div>
+            <div class="user-role-tag">Customer Account</div>
+          </div>
+          <button onclick="Auth.logout()" class="btn btn-icon btn-secondary btn-sm" title="Log Out">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-main">
+      <header class="dashboard-topbar">
+        <div class="dashboard-topbar-left">
+          <button class="mobile-sidebar-toggle-btn" data-action="toggle-sidebar" aria-label="Open Navigation Menu">
+            <i class="fa-solid fa-bars-staggered"></i>
+          </button>
+          <div class="dashboard-page-title">
+            <h2 id="topbar-title">My Milk Subscriptions</h2>
+            <p class="text-muted" style="font-size: 0.875rem;">Manage active daily schedules, pause deliveries, or track daily milk bottles.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-topbar-actions flex items-center gap-3">
+          <div class="translate-widget-slot"></div>
+          <a href="index.html" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-plus"></i>
+            <span>Subscribe to New Dairy</span>
+          </a>
+        </div>
+      </header>
+
+      <div class="dashboard-content-body">
+        <!-- TAB 1: SUBSCRIPTIONS -->
+        <div class="tab-panel active" id="tab-subscriptions">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Active Subscriptions</div>
+                <div class="stat-value" id="stat-active-subs">0</div>
+              </div>
+              <div class="stat-icon-wrap"><i class="fa-solid fa-bottle-droplet"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Daily Milk Volume</div>
+                <div class="stat-value" id="stat-daily-litres">0.0 L</div>
+              </div>
+              <div class="stat-icon-wrap"><i class="fa-solid fa-glass-water"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Next Scheduled Delivery</div>
+                <div class="stat-value" style="font-size: 1.125rem;" id="stat-next-slot">Tomorrow 5:30 AM</div>
+              </div>
+              <div class="stat-icon-wrap"><i class="fa-solid fa-clock"></i></div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between" style="margin-bottom: 1.25rem;">
+            <h3 style="font-size: 1.25rem;">Your Scheduled Milk Deliveries</h3>
+            <span class="text-muted" style="font-size: 0.875rem;">Pause or skip deliveries anytime before 9:00 PM</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-6" id="subscriptions-container">
+            <div class="empty-state card" style="grid-column: 1 / -1;">
+              <div class="spinner"></div>
+              <p style="margin-top: 1rem; color: var(--color-text-muted);">Loading your active subscriptions...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: ORDERS & TRACKING -->
+        <div class="tab-panel" id="tab-orders">
+          <div class="card">
+            <div class="card-header">
+              <h3 style="font-size: 1.125rem;">Recent Dispatches & One-Time Orders</h3>
+              <button class="btn btn-secondary btn-sm" id="btn-refresh-orders"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+            </div>
+            <div class="card-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Dairy Partner</th>
+                      <th>Items / Milk Type</th>
+                      <th>Delivery Date & Slot</th>
+                      <th>Delivery Status</th>
+                      <th>Amount</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="orders-table-body">
+                    <tr>
+                      <td colspan="6" style="text-align: center; padding: 3rem;">
+                        <div class="spinner"></div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: SUPPORT & LIVE HELPDESK -->
+        <div class="tab-panel" id="tab-complaints">
+          <div class="flex items-center justify-between flex-wrap gap-4" style="margin-bottom: 1.5rem;">
+            <div>
+              <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">
+                <i class="fa-solid fa-headset" style="color: var(--theme-primary);"></i> Customer Support & Live Helpdesk
+              </h3>
+              <p class="text-muted" style="font-size: 0.875rem;">
+                Chat directly with Near Dairy administrators and support specialists for milk delivery issues, billing adjustments, or quality inquiries.
+              </p>
+            </div>
+            <button class="btn btn-danger btn-sm" id="btn-open-complaint-modal" style="white-space: nowrap; flex-shrink: 0;">
+              <i class="fa-solid fa-triangle-exclamation"></i> Raise a Complaint / Support
+            </button>
+          </div>
+
+          <!-- Quick Category Cards -->
+          <div class="grid grid-cols-3 gap-4" style="margin-bottom: 1.5rem;">
+            <div class="card" style="padding: 1.25rem; background: #FEF2F2; border-color: #FECACA;">
+              <div class="flex items-center gap-3" style="margin-bottom: 0.5rem;">
+                <div class="stat-icon-wrap" style="width: 36px; height: 36px; font-size: 1rem; background: #FEE2E2; color: #DC2626;">
+                  <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <h4 style="font-size: 0.9375rem; font-weight: 700; color: #B91C1C;">Late / Missed Delivery</h4>
+              </div>
+              <p class="text-muted" style="font-size: 0.8125rem; line-height: 1.45;">
+                Did not receive your morning or evening milk bottle within the scheduled slot? Our team investigates directly with the rider.
+              </p>
+            </div>
+
+            <div class="card" style="padding: 1.25rem; background: #FFFBEB; border-color: #FDE68A;">
+              <div class="flex items-center gap-3" style="margin-bottom: 0.5rem;">
+                <div class="stat-icon-wrap" style="width: 36px; height: 36px; font-size: 1rem; background: #FEF3C7; color: #D97706;">
+                  <i class="fa-solid fa-bottle-droplet"></i>
+                </div>
+                <h4 style="font-size: 0.9375rem; font-weight: 700; color: #92400E;">Packaging & Quality</h4>
+              </div>
+              <p class="text-muted" style="font-size: 0.8125rem; line-height: 1.45;">
+                Damaged seal, bottle leakage, or milk freshness issues. Upload photos to get immediate replacement or account credits.
+              </p>
+            </div>
+
+            <div class="card" style="padding: 1.25rem; background: #F0FDF4; border-color: #BBF7D0;">
+              <div class="flex items-center gap-3" style="margin-bottom: 0.5rem;">
+                <div class="stat-icon-wrap" style="width: 36px; height: 36px; font-size: 1rem; background: #DCFCE7; color: #166534;">
+                  <i class="fa-solid fa-wallet"></i>
+                </div>
+                <h4 style="font-size: 0.9375rem; font-weight: 700; color: #166534;">Billing & Pause Credits</h4>
+              </div>
+              <p class="text-muted" style="font-size: 0.8125rem; line-height: 1.45;">
+                Questions about subscription payments, invoice breakdown, or paused delivery credit adjustments.
+              </p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header flex items-center justify-between" style="flex-wrap: wrap; gap: 0.75rem;">
+              <div style="flex: 1; min-width: 200px;">
+                <h3 style="font-size: 1.125rem; font-weight: 700;">Your Support Tickets & Dispute History</h3>
+                <span class="text-muted" style="font-size: 0.78rem;">Click any ticket to open live chat with support</span>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-customer-refresh-support" style="white-space: nowrap; flex-shrink: 0;">
+                <i class="fa-solid fa-rotate-right"></i> Refresh
+              </button>
+            </div>
+            <div class="card-body" style="padding: 1.25rem;">
+              <div class="support-tickets-grid" id="complaints-list">
+                <div class="text-center text-muted" style="padding: 2rem; grid-column: 1 / -1;">
+                  <div class="spinner" style="width: 24px; height: 24px; margin: 0 auto 0.75rem;"></div>
+                  Loading your support requests...
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: MY PROFILE, EXACT DELIVERY LOCATION & PREFERENCES -->
+        <div class="tab-panel" id="tab-profile">
+          <form id="customer-profile-form" style="max-width: 860px; display: flex; flex-direction: column; gap: 1.75rem;">
+            
+            <!-- 1. Personal Info & Profile Picture Card -->
+            <div class="card">
+              <div class="card-header">
+                <h3 style="font-size: 1.15rem;"><i class="fa-solid fa-user" style="color: var(--theme-primary);"></i> Personal Profile & Photo</h3>
+              </div>
+              <div class="card-body">
+                <!-- Avatar Upload -->
+                <div class="form-group" style="margin-bottom: 1.75rem;">
+                  <label class="form-label">Profile Photo</label>
+                  <div class="avatar-upload-wrap">
+                    <div class="avatar-preview-container" id="customer-avatar-trigger" title="Click to upload new photo">
+                      <img id="customer-profile-avatar-img" src="https://api.dicebear.com/7.x/initials/svg?seed=Customer" class="avatar-preview-img" alt="Avatar">
+                      <div class="avatar-upload-overlay">
+                        <i class="fa-solid fa-camera"></i>
+                        <span>Upload</span>
+                      </div>
+                    </div>
+                    <div class="avatar-meta-info">
+                      <input type="file" id="customer-avatar-file" accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
+                      <input type="hidden" id="customer-avatar-url" value="">
+                      <div class="flex items-center gap-2 flex-wrap" style="margin-bottom: 0.25rem;">
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-customer-choose-avatar">
+                          <i class="fa-solid fa-cloud-arrow-up"></i> Upload New Photo
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-customer-delete-avatar" style="color: var(--color-danger); display: none;">
+                          <i class="fa-solid fa-trash-can"></i> Remove Photo
+                        </button>
+                      </div>
+                      <span class="text-muted" style="font-size: 0.75rem; word-break: break-word;">Stored securely in Supabase Cloud Storage (Max 5MB)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="form-group">
+                    <label class="form-label" for="profile-full-name">Full Name <span style="color: var(--color-danger);">*</span></label>
+                    <input type="text" id="profile-full-name" class="form-input" placeholder="e.g. Rahul Sharma" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="profile-email">Email Address</label>
+                    <input type="email" id="profile-email" class="form-input" disabled style="background: #F8FAFC; color: var(--color-text-muted);">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="profile-phone">Primary Mobile Number <span style="color: var(--color-danger);">*</span></label>
+                    <input type="tel" id="profile-phone" class="form-input" placeholder="+91 98765 43210" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="profile-alt-phone">Alternate Phone (Optional)</label>
+                    <input type="tel" id="profile-alt-phone" class="form-input" placeholder="For delivery boy / family backup">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Actual Delivery Location & GPS Coordinates (Like Dairy Partner) -->
+            <div class="card">
+              <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+                <div>
+                  <h3 style="font-size: 1.15rem;"><i class="fa-solid fa-map-location-dot" style="color: #16A34A;"></i> Milk Delivery Location & Exact GPS Pin</h3>
+                  <p class="text-muted" style="font-size: 0.8125rem; margin-top: 0.2rem;">Dairy partners and morning delivery riders use these exact coordinates for doorstep delivery</p>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-detect-customer-gps">
+                  <i class="fa-solid fa-location-crosshairs"></i>
+                  <span>Detect My Live GPS</span>
+                </button>
+              </div>
+              <div class="card-body">
+                <!-- Interactive Delivery Location Map -->
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <label class="form-label" style="margin-bottom: 0;">Drag the Pin or Click Map to Set Exact Gate / Doorstep Location</label>
+                    <span id="gps-status-badge" class="badge badge-primary" style="font-size: 0.72rem;">📍 Pinpoint GPS Set</span>
+                  </div>
+                  <div id="customer-delivery-map" style="width: 100%; height: 260px; border-radius: var(--radius-lg); border: 1.5px solid var(--color-border); z-index: 1;"></div>
+                  
+                  <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.75rem; flex-wrap: wrap;">
+                    <div class="gps-coords-badge">
+                      <i class="fa-solid fa-compass" style="color: var(--theme-primary);"></i>
+                      <span>Lat: <strong id="disp-lat">19.0760</strong></span>
+                    </div>
+                    <div class="gps-coords-badge">
+                      <i class="fa-solid fa-compass" style="color: var(--theme-primary);"></i>
+                      <span>Lng: <strong id="disp-lng">72.8777</strong></span>
+                    </div>
+                    <input type="hidden" id="profile-lat" value="19.0760">
+                    <input type="hidden" id="profile-lng" value="72.8777">
+                    <span class="text-muted" style="font-size: 0.75rem;">Clicking map automatically adjusts GPS coordinates</span>
+                  </div>
+                </div>
+
+                <!-- Structured Address Fields -->
+                <div class="grid grid-cols-2 gap-4" style="margin-top: 1.25rem;">
+                  <div class="form-group" style="grid-column: span 2;">
+                    <label class="form-label" for="profile-flat-building">Flat / House / Door No. & Apartment / Society Name <span style="color: var(--color-danger);">*</span></label>
+                    <input type="text" id="profile-flat-building" class="form-input" placeholder="e.g. Flat 402, B-Wing, Green Meadows Society" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="profile-street-area">Street / Road / Colony / Area <span style="color: var(--color-danger);">*</span></label>
+                    <input type="text" id="profile-street-area" class="form-input" placeholder="e.g. Kondhwa Budruk Main Road" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="profile-landmark">Landmark (e.g. Near Temple / School / Shop)</label>
+                    <input type="text" id="profile-landmark" class="form-input" placeholder="e.g. Opposite Reliance Fresh">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="profile-city">City / Town <span style="color: var(--color-danger);">*</span></label>
+                    <input type="text" id="profile-city" class="form-input" placeholder="e.g. Pune" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="profile-state">State <span style="color: var(--color-danger);">*</span></label>
+                    <input type="text" id="profile-state" class="form-input" placeholder="e.g. Maharashtra" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="profile-pincode">Pincode / Postal Code <span style="color: var(--color-danger);">*</span></label>
+                    <input type="text" id="profile-pincode" class="form-input" placeholder="e.g. 411048" maxlength="6" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="profile-address">Full Formatted Address (Auto-generated)</label>
+                    <input type="text" id="profile-address" class="form-input" placeholder="Auto-generated complete address" readonly style="background: #F8FAFC; color: var(--color-text);">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Milk Delivery Preferences & Instructions for Delivery Boy -->
+            <div class="card">
+              <div class="card-header">
+                <h3 style="font-size: 1.15rem;"><i class="fa-solid fa-bottle-droplet" style="color: #2563EB;"></i> Milk Delivery Instructions & Preferences</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                  <label class="form-label">Quick Delivery Instructions for Morning/Evening Rider</label>
+                  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+                    <button type="button" class="instruction-chip" data-text="Ring doorbell once">🔔 Ring Bell Once</button>
+                    <button type="button" class="instruction-chip" data-text="Leave in milk bag on door handle/hook">🛍️ Leave in Milk Bag at Door</button>
+                    <button type="button" class="instruction-chip" data-text="Leave with society security guard">🛡️ Leave with Security Guard</button>
+                    <button type="button" class="instruction-chip" data-text="Please call before delivery">📞 Call on Arrival</button>
+                    <button type="button" class="instruction-chip" data-text="Do not ring bell (baby sleeping)">🤫 Do Not Ring Bell</button>
+                  </div>
+                  <textarea id="profile-delivery-instructions" class="form-textarea" rows="2" placeholder="Specific notes for dairy delivery person (e.g. 4th floor, lift available, leave bottles in the blue thermal bag on door)"></textarea>
+                </div>
+
+                <div class="form-actions-bar flex items-center justify-end gap-3" style="padding-top: 1rem; border-top: 1px solid var(--color-border); margin-top: 0.5rem;">
+                  <button type="submit" class="btn btn-primary" id="btn-save-customer-profile" style="padding: 0.75rem 1.5rem;">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Profile & Delivery Address
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- TAB 5: ACCOUNT & SECURITY SETTINGS -->
+        <div class="tab-panel" id="tab-settings">
+          
+          <!-- 1. Account Profile & Full Name -->
+          <div class="settings-section-card">
+            <div class="settings-card-header">
+              <h3><i class="fa-solid fa-user-pen" style="color: #2563EB;"></i> Personal Profile & Full Name</h3>
+              <span class="badge badge-primary"><i class="fa-solid fa-id-card"></i> Customer Identity</span>
+            </div>
+            <div class="settings-card-body">
+              <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 1.25rem;">
+                Your full name appears on your milk subscription slips, delivery dispatches, and dashboard greeting.
+              </p>
+              <form id="form-change-customer-name">
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="form-group">
+                    <label class="form-label" for="settings-customer-fullname">Full Name <span style="color: var(--color-danger);">*</span></label>
+                    <input type="text" id="settings-customer-fullname" class="form-input" placeholder="e.g. Rahul Sharma" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="settings-customer-phone">Primary Phone Number</label>
+                    <input type="tel" id="settings-customer-phone" class="form-input" placeholder="+91 98765 43210">
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between flex-wrap gap-3" style="padding-top: 1rem; border-top: 1px solid var(--color-border); margin-top: 0.5rem;">
+                  <span class="text-muted" style="font-size: 0.78rem;"><i class="fa-solid fa-circle-check" style="color: #16A34A;"></i> Instantly synchronized across your profile and orders.</span>
+                  <button type="submit" class="btn btn-primary btn-sm" id="btn-update-customer-name">
+                    <i class="fa-solid fa-floppy-disk"></i> Update Full Name
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 2. Email Address Management -->
+          <div class="settings-section-card">
+            <div class="settings-card-header">
+              <h3><i class="fa-solid fa-envelope" style="color: #2563EB;"></i> Login Email Address</h3>
+              <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Primary Email</span>
+            </div>
+            <div class="settings-card-body">
+              <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 1.25rem;">
+                Your email is used to log in, receive daily milk delivery invoices, and reset credentials.
+              </p>
+              <form id="form-change-email">
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="form-group">
+                    <label class="form-label" for="settings-current-email">Current Registered Email</label>
+                    <input type="email" id="settings-current-email" class="form-input" readonly style="background: #F1F5F9; color: var(--color-text);">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="settings-new-email">New Email Address <span style="color: var(--color-danger);">*</span></label>
+                    <input type="email" id="settings-new-email" class="form-input" placeholder="e.g. yourname@example.com" required>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between flex-wrap gap-3" style="padding-top: 1rem; border-top: 1px solid var(--color-border); margin-top: 0.5rem;">
+                  <span class="text-muted" style="font-size: 0.78rem;"><i class="fa-solid fa-shield-halved" style="color: #16A34A;"></i> A fresh session token will be created automatically upon updating.</span>
+                  <button type="submit" class="btn btn-primary btn-sm" id="btn-update-email">
+                    <i class="fa-solid fa-envelope-circle-check"></i> Update Login Email
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 2. Password & Credential Security -->
+          <div class="settings-section-card">
+            <div class="settings-card-header">
+              <h3><i class="fa-solid fa-lock" style="color: #D97706;"></i> Password & Security</h3>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-settings-forgot-password" style="font-size: 0.78rem;">
+                <i class="fa-solid fa-key"></i> Send Reset Link
+              </button>
+            </div>
+            <div class="settings-card-body">
+              <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 1.25rem;">
+                Ensure your account is using a secure password with letters, numbers, and symbols.
+              </p>
+              <form id="form-change-password">
+                <div class="grid grid-cols-3 gap-4">
+                  <div class="form-group">
+                    <label class="form-label" for="settings-current-password">Current Password</label>
+                    <div class="password-input-wrap">
+                      <input type="password" id="settings-current-password" class="form-input" placeholder="••••••••">
+                      <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('settings-current-password', this)">
+                        <i class="fa-regular fa-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="settings-new-password">New Password <span style="color: var(--color-danger);">*</span></label>
+                    <div class="password-input-wrap">
+                      <input type="password" id="settings-new-password" class="form-input" placeholder="Min. 6 characters" minlength="6" required>
+                      <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('settings-new-password', this)">
+                        <i class="fa-regular fa-eye"></i>
+                      </button>
+                    </div>
+                    <div class="password-strength-bar">
+                      <div class="password-strength-fill" id="password-strength-fill"></div>
+                    </div>
+                    <span class="password-strength-text" id="password-strength-text" style="color: var(--color-text-muted);">Strength: None</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="settings-confirm-password">Confirm New Password <span style="color: var(--color-danger);">*</span></label>
+                    <div class="password-input-wrap">
+                      <input type="password" id="settings-confirm-password" class="form-input" placeholder="Re-type new password" minlength="6" required>
+                      <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('settings-confirm-password', this)">
+                        <i class="fa-regular fa-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between flex-wrap gap-3" style="padding-top: 1rem; border-top: 1px solid var(--color-border); margin-top: 0.5rem;">
+                  <span class="text-muted" style="font-size: 0.78rem;"><i class="fa-solid fa-lock" style="color: #2563EB;"></i> End-to-end encrypted password verification.</span>
+                  <button type="submit" class="btn btn-primary btn-sm" id="btn-update-password">
+                    <i class="fa-solid fa-circle-check"></i> Save New Password
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 3. Notification & Delivery Alerts Preferences -->
+          <div class="settings-section-card">
+            <div class="settings-card-header">
+              <h3><i class="fa-solid fa-bell" style="color: #7C3AED;"></i> Notification & Delivery Alerts</h3>
+              <span class="badge badge-primary">Real-time</span>
+            </div>
+            <div class="settings-card-body">
+              <form id="form-notification-prefs">
+                <div class="toggle-switch-wrap">
+                  <div class="toggle-switch-label-group">
+                    <div class="toggle-switch-icon" style="background:#F0FDF4; color:#16A34A;">
+                      <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div>
+                      <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">WhatsApp Delivery Updates</div>
+                      <div class="text-muted" style="font-size: 0.8125rem;">Receive live morning milk dispatch and doorstep delivery confirmation on WhatsApp.</div>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="pref-whatsapp" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-switch-wrap">
+                  <div class="toggle-switch-label-group">
+                    <div class="toggle-switch-icon" style="background:#EFF6FF; color:#2563EB;">
+                      <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <div>
+                      <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">Morning Delivery Alert</div>
+                      <div class="text-muted" style="font-size: 0.8125rem;">Get a gentle alert at 5:45 AM when the morning delivery vehicle enters your local zone.</div>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="pref-morning-alert" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-switch-wrap">
+                  <div class="toggle-switch-label-group">
+                    <div class="toggle-switch-icon" style="background:#FFFBEB; color:#D97706;">
+                      <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <div>
+                      <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">Monthly Invoices & Billing Receipts</div>
+                      <div class="text-muted" style="font-size: 0.8125rem;">Receive itemized monthly milk consumption bills and Razorpay payment confirmation.</div>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="pref-invoices" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-switch-wrap">
+                  <div class="toggle-switch-label-group">
+                    <div class="toggle-switch-icon" style="background:#FAF5FF; color:#7C3AED;">
+                      <i class="fa-solid fa-percent"></i>
+                    </div>
+                    <div>
+                      <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">Neighborhood Farm Offers & Fresh Malai Paneer Alerts</div>
+                      <div class="text-muted" style="font-size: 0.8125rem;">Special seasonal ghee batches and discount coupons from nearby gaushalas.</div>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="pref-offers">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+
+                <div class="flex items-center justify-end" style="padding-top: 1.25rem; margin-top: 0.5rem;">
+                  <button type="submit" class="btn btn-secondary btn-sm" id="btn-save-prefs">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Preferences
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 4. Connected Devices & Active Sessions -->
+          <div class="settings-section-card">
+            <div class="settings-card-header flex items-center justify-between" style="flex-wrap: wrap; gap: 0.75rem;">
+              <h3 style="margin: 0;"><i class="fa-solid fa-laptop-code" style="color: #0284C7;"></i> Active Sessions & Connected Devices</h3>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-logout-all" style="color: var(--color-danger); border-color: #FECACA; white-space: nowrap; flex-shrink: 0;">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out All Devices
+              </button>
+            </div>
+            <div class="settings-card-body">
+              <div class="session-device-item">
+                <div class="session-device-info">
+                  <div class="session-device-icon">
+                    <i class="fa-solid fa-desktop"></i>
+                  </div>
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">Chrome on Windows</div>
+                    <div class="text-muted" style="font-size: 0.78rem;">Current Active Session • Pune, Maharashtra</div>
+                  </div>
+                </div>
+                <span class="badge badge-success" style="font-size: 0.72rem;"><i class="fa-solid fa-circle"></i> Active Now</span>
+              </div>
+
+              <div class="session-device-item">
+                <div class="session-device-info">
+                  <div class="session-device-icon" style="background: #F1F5F9; color: #475569;">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                  </div>
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">Near Dairy Mobile Web (Safari iOS)</div>
+                    <div class="text-muted" style="font-size: 0.78rem;">Last active 2 days ago • Pune</div>
+                  </div>
+                </div>
+                <span class="text-muted" style="font-size: 0.75rem;">Signed In</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Danger Zone -->
+          <div class="settings-section-card" style="border-color: #FECACA;">
+            <div class="settings-card-header" style="background: #FEF2F2; border-color: #FECACA;">
+              <h3 style="color: #DC2626;"><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h3>
+            </div>
+            <div class="settings-card-body">
+              <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">Deactivate / Close Customer Account</div>
+                  <div class="text-muted" style="font-size: 0.8125rem;">Cancel all recurring subscriptions, delete saved addresses, and close account access.</div>
+                </div>
+                <button type="button" class="btn btn-danger btn-sm" id="btn-delete-account">
+                  <i class="fa-solid fa-trash-can"></i> Deactivate Account
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: RAISE COMPLAINT / CREATE SUPPORT TICKET -->
+  <div class="modal-overlay" id="complaint-modal">
+    <div class="modal-container" style="max-width: 560px;">
+      <div class="modal-header">
+        <div class="flex items-center gap-2">
+          <div class="stat-icon-wrap" style="width: 34px; height: 34px; font-size: 0.95rem; background: #FEE2E2; color: #DC2626;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div>
+            <h3 class="modal-title" style="margin-bottom: 0;">Raise Support & Delivery Issue</h3>
+            <p class="text-muted" style="font-size: 0.78rem; margin: 0;">Our customer care team and dairy partner will resolve this promptly.</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="Modal.close('complaint-modal')">&times;</button>
+      </div>
+      <form id="form-customer-raise-ticket">
+        <div class="modal-body" style="padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 0.8125rem;">Select Dairy Partner <span style="color: var(--color-danger);">*</span></label>
+              <select id="complaint-dairy-select" class="form-select" required>
+                <!-- Injected via customer.js -->
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 0.8125rem;">Problem Category <span style="color: var(--color-danger);">*</span></label>
+              <select id="complaint-type-select" class="form-select" required>
+                <option value="delivery">⏰ Late or Missed Delivery</option>
+                <option value="quality">🥛 Milk Quality / Spoilage / Taste</option>
+                <option value="packaging">🛍️ Bottle / Pouch Leaked or Damaged</option>
+                <option value="payout">💳 Billing / Pause Credit Query</option>
+                <option value="general">💬 Other Support Query</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.8125rem;">Subject / Brief Summary <span style="color: var(--color-danger);">*</span></label>
+            <input type="text" id="complaint-subject" class="form-input" placeholder="e.g. Milk not received for morning 6:00 AM slot" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.8125rem;">Detailed Description <span style="color: var(--color-danger);">*</span></label>
+            <textarea id="complaint-description" class="form-textarea" rows="3" placeholder="Please describe the issue in detail..." required></textarea>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.8125rem;">Photo / Screenshot Attachment (Optional)</label>
+            <input type="file" id="complaint-attachment-file" class="form-input" accept="image/*, application/pdf">
+            <span class="text-muted" style="font-size: 0.72rem; margin-top: 0.25rem; display: block;">Upload a photo of the leaked bottle, missing pouch, or order receipt.</span>
+          </div>
+
+        </div>
+        <div class="modal-footer flex items-center justify-between">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="Modal.close('complaint-modal')">Cancel</button>
+          <button type="submit" class="btn btn-danger btn-sm" id="btn-submit-complaint">
+            <i class="fa-solid fa-paper-plane"></i> Submit Ticket & Start Chat
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CUSTOMER LIVE CHAT WITH SUPPORT -->
+  <div class="modal-overlay" id="modal-customer-chat">
+    <div class="modal-container" style="max-width: 760px; height: 85vh; display: flex; flex-direction: column;">
+      
+      <!-- Chat Header -->
+      <div class="modal-header" style="border-bottom: 1px solid var(--color-border); padding: 1rem 1.25rem;">
+        <div class="flex items-center gap-3">
+          <div class="stat-icon-wrap" style="width: 40px; height: 40px; font-size: 1.1rem; background: #EEF2FF; color: var(--theme-primary);">
+            <i class="fa-solid fa-headset"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="modal-title" id="customer-chat-ticket-title" style="margin-bottom: 0; font-size: 1.05rem;">Support Conversation</h3>
+              <span id="customer-chat-ticket-num" class="ticket-number-badge">TKT-1001</span>
+              <span id="customer-chat-status-badge" class="ticket-status-pill status-open">Open</span>
+            </div>
+            <p class="text-muted" id="customer-chat-subtitle" style="font-size: 0.78rem; margin: 0;">Near Dairy Resolution Desk</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="Modal.close('modal-customer-chat')">&times;</button>
+      </div>
+
+      <!-- Chat Context Bar -->
+      <div class="chat-context-bar" style="padding: 0.45rem 1.25rem;">
+        <div class="chat-context-item">
+          <i class="fa-solid fa-tag" style="color: var(--theme-primary);"></i>
+          <span>Category: <strong id="customer-chat-category">Delivery</strong></span>
+        </div>
+        <div class="chat-context-item" id="customer-chat-dairy-wrap">
+          <i class="fa-solid fa-store" style="color: #16A34A;"></i>
+          <span>Dairy: <strong id="customer-chat-dairy">Partner Dairy</strong></span>
+        </div>
+        <div class="chat-context-item">
+          <i class="fa-solid fa-clock" style="color: var(--color-text-muted);"></i>
+          <span>Opened: <strong id="customer-chat-created">Today</strong></span>
+        </div>
+      </div>
+
+      <!-- Chat Messages Stream -->
+      <div class="chat-messages-stream" id="customer-chat-messages-stream" style="flex: 1; overflow-y: auto;">
+        <!-- Injected via customer.js -->
+      </div>
+
+      <!-- Quick Canned Replies for Customer -->
+      <div class="quick-canned-bar" style="padding: 0.4rem 1rem;">
+        <span class="text-muted" style="font-size: 0.72rem; font-weight: 700; white-space: nowrap;"><i class="fa-solid fa-bolt" style="color: var(--theme-primary);"></i> Quick Reply:</span>
+        <button type="button" class="canned-chip" data-target="customer-chat-input" data-text="Delivery was received, thank you!">✓ Milk received</button>
+        <button type="button" class="canned-chip" data-target="customer-chat-input" data-text="Please adjust the missing delivery amount as billing credit.">💳 Adjust as credit</button>
+        <button type="button" class="canned-chip" data-target="customer-chat-input" data-text="Please ensure tomorrow morning's slot is on time.">⏰ Tomorrow on-time request</button>
+        <button type="button" class="canned-chip" data-target="customer-chat-input" data-text="I have uploaded the photo for your verification.">📷 Photo uploaded</button>
+      </div>
+
+      <!-- Chat Composer Box -->
+      <div class="helpdesk-chat-composer" style="padding: 0.75rem 1rem;">
+        <form id="form-customer-chat-composer">
+          <div id="customer-attachment-preview" class="composer-attachment-preview" style="display: none;">
+            <i class="fa-solid fa-paperclip" style="color: var(--theme-primary);"></i>
+            <span id="customer-attachment-name" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">file.jpg</span>
+            <button type="button" id="btn-customer-remove-attachment" style="border: none; background: transparent; cursor: pointer; color: var(--color-danger); font-size: 0.85rem;">&times;</button>
+          </div>
+
+          <div class="composer-input-row">
+            <textarea id="customer-chat-input" class="composer-textarea" rows="1" placeholder="Type a message to Support & Admin... (Press Enter to Send)"></textarea>
+            
+            <div class="composer-actions">
+              <input type="file" id="customer-chat-file-input" style="display: none;" accept="image/*, application/pdf">
+              <button type="button" class="btn btn-secondary btn-icon" id="btn-customer-choose-file" title="Attach Photo or Document" style="width: 42px; height: 42px;">
+                <i class="fa-solid fa-paperclip"></i>
+              </button>
+              <button type="submit" class="btn-composer-send" id="btn-customer-send-msg" title="Send Message">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: PAUSE SUBSCRIPTION DELIVERY -->
+  <div class="modal-overlay" id="pause-delivery-modal">
+    <div class="modal-container" style="max-width: 540px;">
+      <div class="modal-header">
+        <div class="flex items-center gap-2">
+          <div class="stat-icon-wrap" style="width: 32px; height: 32px; font-size: 0.9rem; background: #FEF3C7; color: #D97706;">
+            <i class="fa-solid fa-pause"></i>
+          </div>
+          <div>
+            <h3 class="modal-title" style="margin-bottom: 0;">Pause Milk Delivery</h3>
+            <span class="text-muted" style="font-size: 0.78rem;" id="pause-modal-sub-info">Selected Milk Subscription</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="Modal.close('pause-delivery-modal')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="pause-sub-id" value="">
+        <input type="hidden" id="pause-sub-unit-price" value="65">
+        <input type="hidden" id="pause-sub-qty" value="1">
+
+        <!-- 9 PM Cutoff Advisory Banner -->
+        <div class="cutoff-alert-banner">
+          <i class="fa-solid fa-clock-rotate-left" style="font-size: 1.1rem; color: #D97706; margin-top: 2px;"></i>
+          <div>
+            <strong>9:00 PM Cutoff Window:</strong> Changes made before 9:00 PM take effect tomorrow morning. Deliveries will be automatically held and resume according to your chosen dates.
+          </div>
+        </div>
+
+        <!-- Quick Duration Presets -->
+        <div style="margin-bottom: 0.5rem;">
+          <label class="form-label" style="font-size: 0.8125rem;">Quick Duration Presets</label>
+          <div class="pause-preset-grid">
+            <button type="button" class="pause-preset-btn" data-days="3" onclick="applyPausePreset(3, this)">3 Days</button>
+            <button type="button" class="pause-preset-btn active" data-days="7" onclick="applyPausePreset(7, this)">7 Days (1 Wk)</button>
+            <button type="button" class="pause-preset-btn" data-days="14" onclick="applyPausePreset(14, this)">14 Days (2 Wks)</button>
+            <button type="button" class="pause-preset-btn" data-days="indefinite" onclick="applyPausePreset('indefinite', this)">Indefinite</button>
+          </div>
+        </div>
+
+        <!-- Date Range Pickers -->
+        <div class="grid grid-cols-2 gap-4" style="margin-bottom: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.8125rem;"><i class="fa-solid fa-calendar-minus" style="color: #D97706;"></i> Pause Start Date</label>
+            <input type="date" id="pause-start-date" class="form-input" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;" id="wrap-pause-end-date">
+            <label class="form-label" style="font-size: 0.8125rem;"><i class="fa-solid fa-calendar-plus" style="color: #16A34A;"></i> Resume Date (End)</label>
+            <input type="date" id="pause-end-date" class="form-input">
+          </div>
+        </div>
+
+        <!-- Pause Reason -->
+        <div class="form-group">
+          <label class="form-label" style="font-size: 0.8125rem;">Reason for Pause</label>
+          <select id="pause-reason-select" class="form-select">
+            <option value="Vacation / Out of Station">Going on Vacation / Out of Station</option>
+            <option value="Temporary Milk Surplus">Have Extra Milk / Excess Stock at Home</option>
+            <option value="Fasting / Festival / Dietary">Fasting / Festival / Dietary Restriction</option>
+            <option value="Traveling for Work">Traveling for Work / Business Trip</option>
+            <option value="House Locked / Shifting">House Temporarily Locked / Shifting</option>
+            <option value="Other Reason">Other Reason</option>
+          </select>
+        </div>
+
+        <!-- Optional Note for Dairy Partner -->
+        <div class="form-group">
+          <label class="form-label" style="font-size: 0.8125rem;">Note for Dairy Partner (Optional)</label>
+          <input type="text" id="pause-notes-input" class="form-input" placeholder="e.g. Back Sunday night, resume Monday 5:30 AM slot">
+        </div>
+
+        <!-- Live Cost & Billing Credit Breakdown Box -->
+        <div class="pause-calc-card">
+          <div class="pause-calc-grid">
+            <div>
+              <div class="pause-calc-label">Paused Days</div>
+              <div class="pause-calc-val" id="calc-paused-days">7 Days</div>
+            </div>
+            <div>
+              <div class="pause-calc-label">Milk Held</div>
+              <div class="pause-calc-val" id="calc-paused-litres">14.0 L</div>
+            </div>
+            <div>
+              <div class="pause-calc-label">Adjusted Bill Credit</div>
+              <div class="pause-calc-val credit-highlight" id="calc-credit-amount">₹952.00</div>
+            </div>
+          </div>
+          <div class="pause-calc-note">
+            <i class="fa-solid fa-circle-check" style="color: #16A34A; margin-top: 2px;"></i>
+            <span>This amount (<strong id="calc-credit-note-amount">₹952.00</strong>) will be automatically adjusted in your subscription billing and credited to your account. Your dairy partner will be notified immediately.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Modal.close('pause-delivery-modal')">Cancel</button>
+        <button class="btn btn-primary" id="btn-confirm-pause-delivery" style="background: #D97706; border-color: #D97706;">
+          <i class="fa-solid fa-pause"></i> Confirm Pause Delivery
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar Backdrop Overlay -->
+  <div class="sidebar-backdrop-overlay" data-action="close-sidebar"></div>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav">
+    <button class="mobile-bottom-nav-item active" data-tab="subscriptions">
+      <i class="fa-solid fa-calendar-check"></i>
+      <span>Subscriptions</span>
+    </button>
+    <button class="mobile-bottom-nav-item" data-tab="orders">
+      <i class="fa-solid fa-truck-fast"></i>
+      <span>Orders</span>
+    </button>
+    <button class="mobile-bottom-nav-item" data-tab="complaints">
+      <i class="fa-solid fa-headset"></i>
+      <span>Helpdesk</span>
+      <span class="mobile-nav-badge" id="mobile-badge-customer-support" style="display:none;">0</span>
+    </button>
+    <button class="mobile-bottom-nav-item" data-tab="profile">
+      <i class="fa-solid fa-location-dot"></i>
+      <span>Address</span>
+    </button>
+    <button class="mobile-bottom-nav-item" data-tab="settings">
+      <i class="fa-solid fa-user-gear"></i>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/translator.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/customer.js"></script>
+</body>
+</html>

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Near Dairy — Fresh Local Milk & Dairy Delivered Directly from Nearby Dairies</title>
+  <meta name="description" content="Discover trusted local dairy businesses near you. Subscribe to fresh raw cow, buffalo, and A2 Gir milk with doorstep morning and evening delivery.">
+  <link rel="icon" type="image/svg+xml" href="img/logo-icon.svg">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/landing.css">
+</head>
+<body data-role="customer">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="top-navbar" id="topNavbar">
+    <div class="container nav-container">
+      <a href="index.html" class="brand-logo">
+        <img src="img/logo-icon.svg" alt="Near Dairy Logo" class="brand-icon-img">
+        <span class="brand-name"><span class="brand-name-primary">Near</span><span class="brand-name-accent">Dairy</span><span class="brand-name-dot"></span></span>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="nav-links">
+        <a href="#discovery" class="nav-link active"><i class="fa-solid fa-map-location-dot"></i> Find Dairies</a>
+        <a href="#how-it-works" class="nav-link"><i class="fa-solid fa-circle-question"></i> How It Works</a>
+        <a href="#benefits" class="nav-link"><i class="fa-solid fa-shield-heart"></i> Why Near Dairy</a>
+        <a href="#faq" class="nav-link"><i class="fa-solid fa-comments"></i> FAQs</a>
+      </nav>
+
+      <!-- Auth & Translation Action Section -->
+      <div class="flex items-center gap-3">
+        <!-- Online Cloud Translator Widget Slot -->
+        <div class="translate-widget-slot"></div>
+
+        <div id="nav-auth-section" class="flex items-center gap-2">
+          <!-- Injected dynamically by Auth.initNavbar() -->
+        </div>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Open Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer Menu -->
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-content">
+      <div class="mobile-drawer-header">
+        <a href="index.html" class="brand-logo">
+          <img src="img/logo-icon.svg" alt="Near Dairy Logo" class="brand-icon-img">
+          <span class="brand-name"><span class="brand-name-primary">Near</span><span class="brand-name-accent">Dairy</span><span class="brand-name-dot"></span></span>
+        </a>
+        <button class="modal-close-btn" id="mobileDrawerClose">&times;</button>
+      </div>
+
+      <!-- Mobile Online Translator -->
+      <div class="translate-widget-slot" style="margin-bottom: 1.25rem;"></div>
+
+      <ul class="mobile-nav-links">
+        <li><a href="#discovery" class="mobile-nav-link active" onclick="closeMobileDrawer()"><i class="fa-solid fa-map-location-dot"></i> Find Dairies</a></li>
+        <li><a href="#how-it-works" class="mobile-nav-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-circle-question"></i> How It Works</a></li>
+        <li><a href="#benefits" class="mobile-nav-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-shield-heart"></i> Why Near Dairy</a></li>
+        <li><a href="#faq" class="mobile-nav-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-comments"></i> FAQs</a></li>
+      </ul>
+
+      <div id="mobile-drawer-auth-section" style="margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--color-border);" class="flex flex-col gap-2">
+        <a href="auth.html?role=partner" class="btn btn-outline w-full"><i class="fa-solid fa-cow"></i> Dairy Partner Login</a>
+        <a href="auth.html?role=customer" class="btn btn-primary w-full"><i class="fa-solid fa-user"></i> Customer Sign In</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container hero-content">
+      <div class="hero-pill">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>100% Pure, Farm-Direct Local Milk Marketplace</span>
+      </div>
+
+      <h1 class="hero-title">
+        Fresh Milk from Trusted <span>Local Dairies</span> Near You
+      </h1>
+
+      <p class="hero-subtitle">
+        Connect directly with certified local dairy farms and gaushalas. Enjoy flexible morning & evening subscriptions of farm-fresh Cow, Buffalo, and A2 Gir milk delivered within hours of milking.
+      </p>
+
+      <!-- Search & GPS Action -->
+      <div class="hero-search-box">
+        <div class="search-input-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="landing-search-input" placeholder="Search dairy farm, locality, or milk type...">
+        </div>
+        <button class="btn-gps" id="btn-hero-locate" title="Find dairies near your exact location">
+          <i class="fa-solid fa-crosshairs"></i>
+          <span>Use GPS</span>
+        </button>
+        <button class="btn btn-primary" id="btn-hero-search">
+          <span>Search</span>
+        </button>
+      </div>
+
+      <!-- Filter Pills -->
+      <div class="category-pills-bar" id="category-pills">
+        <button class="category-pill active" data-category="all">
+          <i class="fa-solid fa-border-all"></i> All Dairies
+        </button>
+        <button class="category-pill" data-category="Cow Milk">
+          <i class="fa-solid fa-glass-water"></i> Pure Cow Milk
+        </button>
+        <button class="category-pill" data-category="A2 Milk">
+          <i class="fa-solid fa-seedling"></i> Vedic A2 Gir Milk
+        </button>
+        <button class="category-pill" data-category="Buffalo Milk">
+          <i class="fa-solid fa-mug-hot"></i> Buffalo Milk
+        </button>
+        <button class="category-pill" data-category="Ghee">
+          <i class="fa-solid fa-jar"></i> Bilona Desi Ghee
+        </button>
+        <button class="category-pill" data-category="Paneer">
+          <i class="fa-solid fa-cheese"></i> Fresh Malai Paneer
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust Stats Banner -->
+  <section class="stats-banner">
+    <div class="container">
+      <div class="stats-banner-grid">
+        <div class="stat-item-box">
+          <div class="stat-item-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+          <div class="stat-item-content">
+            <div class="stat-item-number">&lt; 3 Hours</div>
+            <div class="stat-item-label">Milking to Doorstep</div>
+          </div>
+        </div>
+
+        <div class="stat-item-box">
+          <div class="stat-item-icon" style="background:#F0FDF4; color:#16A34A;"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="stat-item-content">
+            <div class="stat-item-number">100% Vetted</div>
+            <div class="stat-item-label">FSSAI Certified Dairies</div>
+          </div>
+        </div>
+
+        <div class="stat-item-box">
+          <div class="stat-item-icon" style="background:#FFFBEB; color:#D97706;"><i class="fa-solid fa-bottle-droplet"></i></div>
+          <div class="stat-item-content">
+            <div class="stat-item-number">0 Chemicals</div>
+            <div class="stat-item-label">Zero Preservatives & Powders</div>
+          </div>
+        </div>
+
+        <div class="stat-item-box">
+          <div class="stat-item-icon" style="background:#FAF5FF; color:#7C3AED;"><i class="fa-solid fa-hand-holding-heart"></i></div>
+          <div class="stat-item-content">
+            <div class="stat-item-number">Direct Support</div>
+            <div class="stat-item-label">Fair Prices to Dairy Farmers</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Discovery Section: Dual Screen Map + Dairy Grid -->
+  <section class="discovery-section" id="discovery">
+    <div class="container">
+      <div class="discovery-header">
+        <div>
+          <div class="flex items-center gap-2" style="margin-bottom: 0.25rem;">
+            <h2 class="discovery-title" id="discovery-heading">Nearby Dairies</h2>
+            <span class="badge badge-primary" id="dairies-live-badge">1 Dairy Found</span>
+          </div>
+          <p class="text-muted" id="user-location-text">Showing approved local dairy partners ready for daily morning & evening delivery</p>
+        </div>
+
+        <div class="discovery-controls-wrap">
+          <!-- View Mode Toggle Bar (Dairies Grid vs Map vs Split) -->
+          <div class="view-mode-switcher" id="viewModeSwitcher">
+            <button class="view-mode-btn active" data-view="dairies" id="btn-view-dairies" title="Show Dairies Grid">
+              <i class="fa-solid fa-store"></i>
+              <span>Dairies</span>
+            </button>
+            <button class="view-mode-btn" data-view="map" id="btn-view-map" title="Show Interactive Delivery Map">
+              <i class="fa-solid fa-map-location-dot"></i>
+              <span>Map</span>
+            </button>
+            <button class="view-mode-btn" data-view="split" id="btn-view-split" title="Show Dairies & Map Side by Side">
+              <i class="fa-solid fa-table-columns"></i>
+              <span>Split</span>
+            </button>
+          </div>
+
+          <div class="radius-control">
+            <label for="radius-range" style="font-size: 0.8125rem; font-weight: 700;">Radius: <span id="radius-val" style="color: var(--theme-primary); font-weight: 800;">10 km</span></label>
+            <input type="range" id="radius-range" class="radius-slider" min="1" max="50" value="10" step="1">
+          </div>
+
+          <button class="btn btn-sm btn-secondary" id="btn-refresh-nearby" title="Refresh nearby search">
+            <i class="fa-solid fa-rotate-right"></i> Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Manual Location Control & City Quick-Select Bar -->
+      <div class="manual-location-bar">
+        <div class="manual-location-main-row">
+          <!-- Manual Search Input Group -->
+          <div class="manual-search-wrap">
+            <div class="manual-input-box">
+              <i class="fa-solid fa-location-dot manual-pin-icon"></i>
+              <input type="text" id="manual-location-input" class="form-input manual-input" placeholder="Search city or locality (e.g. Pune, Katraj, Kothrud, Baner, Mumbai)...">
+            </div>
+            <button class="btn btn-primary btn-sm btn-manual-search-btn" id="btn-manual-search">
+              <i class="fa-solid fa-magnifying-glass"></i> <span>Set Location</span>
+            </button>
+          </div>
+
+          <!-- Quick City / Area Pills + Live GPS integrated -->
+          <div class="quick-city-pills" id="quick-city-pills">
+            <span class="quick-city-label">Quick Areas:</span>
+            <button type="button" class="btn btn-secondary btn-sm city-shortcut-btn active" data-lat="18.4500" data-lng="73.8567" data-name="Pune (Katraj / Kondhwa Hub)">
+              <i class="fa-solid fa-location-dot" style="color: #16A34A;"></i> Pune Dairies Hub
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm city-shortcut-btn" data-lat="18.5074" data-lng="73.8077" data-name="Kothrud / Deccan, Pune">
+              Kothrud
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm city-shortcut-btn" data-lat="18.5590" data-lng="73.7868" data-name="Baner / Wakad, Pune">
+              Baner / Wakad
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm city-shortcut-btn" data-lat="19.0760" data-lng="72.8777" data-name="Mumbai Central">
+              Mumbai
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm city-shortcut-btn" data-lat="19.0330" data-lng="73.0297" data-name="Navi Mumbai">
+              Navi Mumbai
+            </button>
+            <button type="button" class="btn btn-outline btn-sm manual-gps-btn" id="btn-map-use-gps" title="Detect and use live GPS location">
+              <i class="fa-solid fa-crosshairs"></i> Use Live GPS
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Discovery View Container (Controls layout based on data-view mode) -->
+      <div class="discovery-layout-container view-mode-dairies" id="discoveryLayoutContainer">
+        <!-- Left Column / Full Grid: Dairy Cards -->
+        <div class="dairy-cards-container" id="dairy-cards-list">
+          <div class="empty-state">
+            <div class="spinner"></div>
+            <p style="margin-top: 1rem; color: var(--color-text-muted);">Locating certified local dairy partners...</p>
+          </div>
+        </div>
+
+        <!-- Right Column / Full Map: Interactive Leaflet Map -->
+        <div class="discovery-map-wrapper" id="discoveryMapWrapper">
+          <div class="map-header-bar">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-map-pin" style="color: var(--theme-primary);"></i>
+              <span>Live Delivery Coverage</span>
+            </div>
+            <span class="badge badge-success" id="map-dairy-count">1 Dairy Live</span>
+          </div>
+          <div id="discovery-map"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-it-works-section" id="how-it-works">
+    <div class="container">
+      <div class="text-center" style="max-width: 650px; margin: 0 auto 3.5rem;">
+        <span class="badge badge-primary" style="margin-bottom: 0.75rem;">Simple & Reliable</span>
+        <h2 style="font-size: 2.3rem; margin-bottom: 0.75rem;">How Near Dairy Works</h2>
+        <p class="text-muted">Direct farm-to-doorstep connection in 4 effortless steps.</p>
+      </div>
+
+      <div class="grid grid-cols-4 gap-6">
+        <div class="step-card">
+          <div class="step-num-badge">1</div>
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Locate Nearby Dairies</h3>
+          <p class="text-muted" style="font-size: 0.875rem; line-height: 1.6;">Use GPS to discover certified local farms and gaushalas in your neighborhood radius.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num-badge">2</div>
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Choose Milk & Schedule</h3>
+          <p class="text-muted" style="font-size: 0.875rem; line-height: 1.6;">Pick pure cow, buffalo, or A2 milk. Choose daily or alternate delivery with morning or evening time slots.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num-badge">3</div>
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Subscribe Seamlessly</h3>
+          <p class="text-muted" style="font-size: 0.875rem; line-height: 1.6;">Pay seamlessly via Razorpay. Your subscription is activated instantly for next-morning delivery.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num-badge">4</div>
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Pause Anytime with 1-Click</h3>
+          <p class="text-muted" style="font-size: 0.875rem; line-height: 1.6;">Going on vacation? Pause or resume your deliveries anytime directly from your customer dashboard.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Choose Section -->
+  <section class="benefits-section" id="benefits">
+    <div class="container">
+      <div class="text-center" style="max-width: 650px; margin: 0 auto 3.5rem;">
+        <span class="badge badge-success" style="margin-bottom: 0.75rem;">Purity Guaranteed</span>
+        <h2 style="font-size: 2.3rem; margin-bottom: 0.75rem;">Why Choose Local Dairies?</h2>
+        <p class="text-muted">Freshness, honesty, zero preservatives, and fair prices for local farmers.</p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-6">
+        <div class="benefit-card">
+          <div>
+            <div class="benefit-icon-box" style="background:#EFF6FF; color:#2563EB;">
+              <i class="fa-solid fa-stopwatch-20"></i>
+            </div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Milked & Delivered in Hours</h3>
+            <p class="text-muted" style="font-size: 0.9375rem; line-height: 1.6;">Unlike packaged retail milk that undergoes industrial processing and travels for days, local dairy milk reaches your doorstep within hours of morning milking.</p>
+          </div>
+          <div style="margin-top: 1.5rem; font-size: 0.84rem; font-weight: 700; color: var(--theme-primary);"><i class="fa-solid fa-circle-check"></i> Peak Freshness Guaranteed</div>
+        </div>
+
+        <div class="benefit-card">
+          <div>
+            <div class="benefit-icon-box" style="background:#F0FDF4; color:#16A34A;">
+              <i class="fa-solid fa-certificate"></i>
+            </div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Strict FSSAI & Quality Vetting</h3>
+            <p class="text-muted" style="font-size: 0.9375rem; line-height: 1.6;">Every partner on Near Dairy undergoes physical hygiene checks and FSSAI compliance verification by our administration team before being listed.</p>
+          </div>
+          <div style="margin-top: 1.5rem; font-size: 0.84rem; font-weight: 700; color: var(--color-success);"><i class="fa-solid fa-circle-check"></i> 100% Verified Partners</div>
+        </div>
+
+        <div class="benefit-card">
+          <div>
+            <div class="benefit-icon-box" style="background:#FAF5FF; color:#7C3AED;">
+              <i class="fa-solid fa-heart-pulse"></i>
+            </div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Empower Local Gaushalas</h3>
+            <p class="text-muted" style="font-size: 0.9375rem; line-height: 1.6;">Direct-to-farm relationship. Eliminate commercial middlemen cuts and support sustainable local cattle farming families in your region.</p>
+          </div>
+          <div style="margin-top: 1.5rem; font-size: 0.84rem; font-weight: 700; color: #7C3AED;"><i class="fa-solid fa-hand-holding-heart"></i> Direct Farm Support</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Accordion Section -->
+  <section class="faq-section" id="faq">
+    <div class="container">
+      <div class="text-center" style="max-width: 650px; margin: 0 auto 3rem;">
+        <span class="badge badge-gray" style="margin-bottom: 0.75rem;">Got Questions?</span>
+        <h2 style="font-size: 2.2rem; margin-bottom: 0.75rem;">Frequently Asked Questions</h2>
+        <p class="text-muted">Everything you need to know about fresh milk subscriptions.</p>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item active">
+          <div class="faq-question">
+            <span>How does the morning and evening milk delivery work?</span>
+            <i class="fa-solid fa-chevron-down faq-icon"></i>
+          </div>
+          <div class="faq-answer">
+            Local dairies dispatch their delivery riders in dedicated time slots (usually 5:30 AM – 7:30 AM for morning and 5:30 PM – 7:30 PM for evening). Your fresh milk is placed right at your doorstep in hygienic glass or food-grade containers.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Can I pause my subscription when going on vacation?</span>
+            <i class="fa-solid fa-chevron-down faq-icon"></i>
+          </div>
+          <div class="faq-answer">
+            Yes! You have full flexibility. From your Customer Dashboard, simply click "Pause Subscription" before 9:00 PM the previous night. No charges will be applied for paused days.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Is the milk unadulterated and tested?</span>
+            <i class="fa-solid fa-chevron-down faq-icon"></i>
+          </div>
+          <div class="faq-answer">
+            Yes, all partner dairies on Near Dairy are vetted for FSSAI compliance and zero-chemical handling. Fat % and SNF % parameters are openly displayed for each milk product.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>How do I register as a Dairy Partner?</span>
+            <i class="fa-solid fa-chevron-down faq-icon"></i>
+          </div>
+          <div class="faq-answer">
+            Click on "Dairy Partner" on the Sign In page, select "Create Account", provide your farm address, delivery radius, and FSSAI license. Once vetted by our admin team, your dairy will go live on the map.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Luxury Footer -->
+  <footer class="main-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="brand-logo" style="margin-bottom: 1.25rem;">
+            <img src="img/logo-icon.svg" alt="Near Dairy Logo" class="brand-icon-img">
+            <span class="brand-name"><span style="color: #FFFFFF; font-weight: 900; letter-spacing: -0.03em;">Near</span><span class="brand-name-accent">Dairy</span><span class="brand-name-dot"></span></span>
+          </div>
+          <p style="color: #94A3B8; font-size: 0.9375rem; line-height: 1.6; max-width: 320px;">
+            The hyper-local marketplace for pure farm-fresh milk, paneer, and ghee directly from certified nearby dairy farmers.
+          </p>
+          <p style="color: #94A3B8; font-size: 0.9375rem; line-height: 3.6; max-width: 320px;">
+            <span>Developed By : </span>
+            <span > <i class="fa-solid fa-user"></i> Shivam Munde </span>
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <ul class="footer-links">
+            <li><a href="#discovery">Nearby Dairies</a></li>
+            <li><a href="#how-it-works">How Subscriptions Work</a></li>
+            <li><a href="auth.html?mode=register&role=customer">Customer Signup</a></li>
+            <li><a href="auth.html?role=partner">Partner Portal</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>For Dairies</h4>
+          <ul class="footer-links">
+            <li><a href="auth.html?mode=register&role=partner">List Your Dairy Farm</a></li>
+            <li><a href="auth.html?role=partner">Dispatch Roster</a></li>
+            <li><a href="auth.html?role=partner">Partner Dashboard</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Admin & Help</h4>
+          <ul class="footer-links">
+            <li><a href="admin-dashboard.html">Admin Control Center</a></li>
+            <li><a href="mailto:webshivam2005@gmail.com">webshivam2005@gmail.com</a></li>
+            <li><span style="color: #64748B;">Call: +91 9900099111</span></li>
+            
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 Near Dairy Platform. All rights reserved.</div>
+        <div class="flex items-center gap-4">
+          <a href="auth.html?role=customer">Customer Sign In</a>
+          <a href="auth.html?role=partner">Dairy Partner Sign In</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/translator.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/landing.js"></script>
+</body>
+</html>

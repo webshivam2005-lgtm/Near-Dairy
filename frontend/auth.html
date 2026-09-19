@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In & Register — Near Dairy</title>
+  <meta name="description" content="Sign in or create an account for Near Dairy as a Customer or Dairy Partner.">
+  <link rel="icon" type="image/svg+xml" href="img/logo-icon.svg">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 10%, #EFF6FF 0%, #F8FAFC 80%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .auth-page-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 1.25rem;
+    }
+    .auth-card {
+      background: #FFFFFF;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
+      width: 100%;
+      max-width: 580px;
+      overflow: hidden;
+      transition: all var(--transition-normal);
+    }
+    .role-tabs-header {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      border-bottom: 1px solid var(--color-border);
+      background: #F8FAFC;
+    }
+    .role-tab-btn {
+      padding: 1rem 0.5rem;
+      font-weight: 700;
+      font-size: 0.9375rem;
+      color: var(--color-text-muted);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all var(--transition-fast);
+      border-bottom: 3px solid transparent;
+    }
+    .role-tab-btn:hover {
+      color: var(--color-text);
+      background: #F1F5F9;
+    }
+    .role-tab-btn.active[data-role="customer"] {
+      color: #2563EB;
+      background: #FFFFFF;
+      border-bottom-color: #2563EB;
+    }
+    .role-tab-btn.active[data-role="partner"] {
+      color: #16A34A;
+      background: #FFFFFF;
+      border-bottom-color: #16A34A;
+    }
+    .role-tab-btn.active[data-role="admin"] {
+      color: #7C3AED;
+      background: #FFFFFF;
+      border-bottom-color: #7C3AED;
+    }
+
+    .auth-subtabs {
+      display: flex;
+      border-bottom: 1px solid var(--color-border);
+      padding: 0 2rem;
+      gap: 2rem;
+      background: #FFFFFF;
+    }
+    .subtab-btn {
+      padding: 0.875rem 0;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      color: var(--color-text-muted);
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .subtab-btn.active {
+      color: var(--theme-primary, #2563EB);
+      border-bottom-color: var(--theme-primary, #2563EB);
+    }
+
+    .demo-accounts-box {
+      background: #F8FAFC;
+      border: 1.5px dashed var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      margin-top: 1.75rem;
+    }
+    .demo-btn {
+      padding: 0.625rem 0.875rem;
+      border-radius: var(--radius-md);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: all var(--transition-fast);
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .demo-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+    #partner-map-picker {
+      height: 200px;
+      width: 100%;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      margin-top: 0.5rem;
+    }
+    .pwd-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .pwd-wrapper .form-input {
+      padding-right: 2.85rem !important;
+      width: 100%;
+    }
+    .btn-pwd-toggle {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      padding: 0.35rem 0.5rem;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      line-height: 1;
+      border-radius: var(--radius-sm);
+      transition: color var(--transition-fast), background-color var(--transition-fast);
+    }
+    .btn-pwd-toggle:hover {
+      color: var(--color-text);
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .btn-pwd-toggle i {
+      position: static !important;
+      left: auto !important;
+      right: auto !important;
+      top: auto !important;
+      bottom: auto !important;
+      transform: none !important;
+      pointer-events: auto !important;
+      color: inherit !important;
+      font-size: inherit !important;
+      display: inline-block !important;
+    }
+    .forgot-pwd-link:hover {
+      text-decoration: underline;
+    }
+    #btn-auth-submit {
+      white-space: normal !important;
+      word-break: normal;
+      height: auto;
+      min-height: 48px;
+      padding: 0.8125rem 1rem;
+      font-size: 0.9375rem;
+      line-height: 1.35;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: var(--radius-md);
+      overflow: visible !important;
+    }
+    #btn-auth-submit span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      text-align: center;
+      width: 100%;
+    }
+    .auth-card-body {
+      padding: 2rem;
+    }
+    @media (max-width: 480px) {
+      .auth-page-wrapper {
+        padding: 0.75rem 0.5rem;
+      }
+      .auth-card-body {
+        padding: 1.25rem 1rem !important;
+      }
+      .auth-subtabs {
+        padding: 0 1rem;
+        gap: 1rem;
+      }
+      .demo-accounts-box {
+        padding: 0.875rem;
+      }
+      #btn-auth-submit {
+        font-size: 0.875rem;
+        padding: 0.75rem 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body data-role="customer">
+
+  <!-- Toast Notifications -->
+  <div id="toast-container"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="top-navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="brand-logo">
+        <img src="img/logo-icon.svg" alt="Near Dairy Logo" class="brand-icon-img">
+        <span class="brand-name"><span class="brand-name-primary">Near</span><span class="brand-name-accent">Dairy</span><span class="brand-name-dot"></span></span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link"><i class="fa-solid fa-arrow-left"></i> Back to Homepage</a>
+      </nav>
+
+      <div class="translate-widget-slot"></div>
+    </div>
+  </header>
+
+  <div class="auth-page-wrapper">
+    <div class="auth-card">
+      <!-- Role Tabs (Customer / Dairy Partner) -->
+      <div class="role-tabs-header">
+        <button class="role-tab-btn active" data-role="customer" id="tab-role-customer">
+          <i class="fa-solid fa-user"></i> Customer
+        </button>
+        <button class="role-tab-btn" data-role="partner" id="tab-role-partner">
+          <i class="fa-solid fa-cow"></i> Dairy Partner
+        </button>
+      </div>
+
+      <!-- Sub Tabs (Sign In / Register) -->
+      <div class="auth-subtabs" id="auth-subtabs-row">
+        <div class="subtab-btn active" data-mode="login" id="subtab-login">Sign In</div>
+        <div class="subtab-btn" data-mode="register" id="subtab-register">Create Account</div>
+      </div>
+
+      <div class="auth-card-body">
+        <!-- Alert Box -->
+        <div id="auth-alert" style="display: none; padding: 0.875rem 1rem; border-radius: var(--radius-md); margin-bottom: 1.25rem; font-size: 0.875rem; line-height: 1.4;"></div>
+
+        <!-- AUTH FORM -->
+        <form id="auth-form" novalidate>
+          <!-- User Profile Picture (Register Mode Only) -->
+          <div class="form-group" id="group-avatar" style="display: none; margin-bottom: 1.5rem;">
+            <label class="form-label">Profile Picture <span class="text-muted" style="font-size: 0.75rem; font-weight: normal;">(Optional)</span></label>
+            <div class="avatar-upload-wrap">
+              <div class="avatar-preview-container" id="avatar-preview-trigger" title="Click to upload profile photo">
+                <img id="avatar-preview-img" src="https://api.dicebear.com/7.x/initials/svg?seed=User" class="avatar-preview-img" alt="Avatar">
+                <div class="avatar-upload-overlay">
+                  <i class="fa-solid fa-camera"></i>
+                  <span>Upload</span>
+                </div>
+              </div>
+              <div class="avatar-meta-info">
+                <input type="file" id="input-avatar-file" accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
+                <input type="hidden" id="input-avatar-url" value="">
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-choose-avatar" style="align-self: flex-start;">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Choose Photo
+                </button>
+                <span class="text-muted" style="font-size: 0.75rem;">JPG, PNG or WEBP (Max 5MB)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Full Name (Register Mode Only) -->
+          <div class="form-group" id="group-name" style="display: none;">
+            <label class="form-label" for="input-name">Full Name <span style="color: var(--color-danger);">*</span></label>
+            <div class="input-with-icon">
+              <i class="fa-solid fa-user"></i>
+              <input type="text" id="input-name" class="form-input" placeholder="e.g. Aarav Mehta" autocomplete="name">
+            </div>
+          </div>
+
+          <!-- Email Address -->
+          <div class="form-group">
+            <label class="form-label" for="input-email">Email Address <span style="color: var(--color-danger);">*</span></label>
+            <div class="input-with-icon">
+              <i class="fa-solid fa-envelope"></i>
+              <input type="email" id="input-email" class="form-input" placeholder="name@example.com" required autocomplete="email">
+            </div>
+          </div>
+
+          <!-- Phone Number (Register Mode Only) -->
+          <div class="form-group" id="group-phone" style="display: none;">
+            <label class="form-label" for="input-phone">Phone Number</label>
+            <div class="input-with-icon">
+              <i class="fa-solid fa-phone"></i>
+              <input type="tel" id="input-phone" class="form-input" placeholder="+91 98765 43210" autocomplete="tel">
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+              <label class="form-label" for="input-password" style="margin-bottom: 0;">Password <span style="color: var(--color-danger);">*</span></label>
+              <a href="javascript:void(0)" onclick="openForgotPasswordModal()" class="forgot-pwd-link" style="font-size: 0.8125rem; color: var(--theme-primary, #2563EB); font-weight: 600; text-decoration: none;">Forgot Password?</a>
+            </div>
+            <div class="pwd-wrapper input-with-icon">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="input-password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="btn-pwd-toggle" id="btn-toggle-pwd" title="Show / Hide Password" aria-label="Toggle password visibility">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- PARTNER REGISTRATION SPECIFIC FIELDS -->
+          <div id="partner-registration-fields" style="display: none;">
+            <div style="padding-top: 1rem; margin-top: 1rem; border-top: 1px solid var(--color-border); margin-bottom: 1.25rem;">
+              <h4 style="font-size: 1rem; margin-bottom: 0.25rem; color: #166534;"><i class="fa-solid fa-cow"></i> Dairy Farm Profile Details</h4>
+              <p class="text-muted" style="font-size: 0.8125rem;">Provide your farm banner, certificates, and store location so customers can verify and order milk from you.</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="input-dairy-name">Dairy Farm / Business Name <span style="color: var(--color-danger);">*</span></label>
+              <input type="text" id="input-dairy-name" class="form-input" placeholder="e.g. Krishna Pure Desi Dairy Farm">
+            </div>
+
+            <!-- Dairy Farm Banner Upload -->
+            <div class="form-group">
+              <label class="form-label">Dairy Storefront Banner <span class="text-muted" style="font-size: 0.75rem; font-weight: normal;">(Hero cover for customer storefront)</span></label>
+              <div id="banner-preview-box" class="banner-preview-box" style="display: none;">
+                <img id="banner-preview-img" src="" class="banner-preview-img" alt="Banner Preview">
+                <button type="button" class="banner-remove-btn" id="btn-remove-banner" title="Remove Banner">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+              <div class="banner-upload-dropzone" id="banner-dropzone">
+                <i class="fa-solid fa-image" style="font-size: 1.75rem; color: var(--theme-primary); margin-bottom: 0.5rem;"></i>
+                <div style="font-weight: 700; font-size: 0.875rem; color: var(--color-text);">Click to upload Dairy Banner Image</div>
+                <div class="text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">High resolution PNG, JPG, or WEBP (Max 10MB)</div>
+                <input type="file" id="input-banner-file" accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
+                <input type="hidden" id="input-banner-url" value="">
+              </div>
+            </div>
+
+            <!-- FSSAI License & Delivery Radius -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="form-group">
+                <label class="form-label" for="input-fssai">FSSAI License No.</label>
+                <input type="text" id="input-fssai" class="form-input" placeholder="1152XXXXXXXXXX">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="input-radius">Delivery Radius: <strong id="radius-text" style="color: var(--color-success);">5 km</strong></label>
+                <input type="range" id="input-radius" min="1" max="25" value="5" style="width: 100%; accent-color: #16A34A;">
+              </div>
+            </div>
+
+            <!-- Dairy Certificate & License Upload (PDF/Image) for Admin and Customer Trust -->
+            <div class="form-group">
+              <label class="form-label">
+                <span><i class="fa-solid fa-shield-halved" style="color: #16A34A;"></i> Dairy Certificate / FSSAI License File</span>
+                <span class="badge badge-success" style="font-size: 0.7rem;">Builds Trust</span>
+              </label>
+              
+              <div class="cert-upload-dropzone" id="cert-dropzone">
+                <i class="fa-solid fa-file-shield" style="font-size: 1.75rem; color: #16A34A;"></i>
+                <div style="font-weight: 700; font-size: 0.875rem; color: #166534;">Upload FSSAI License or Quality Certificate</div>
+                <div class="text-muted" style="font-size: 0.75rem;">Upload PDF document or clear Image (Max 15MB)</div>
+                <input type="file" id="input-cert-file" accept="application/pdf, image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
+                <input type="hidden" id="input-cert-url" value="">
+              </div>
+
+              <div id="cert-file-card" class="cert-file-card" style="display: none;">
+                <div class="cert-file-icon" id="cert-file-icon">
+                  <i class="fa-solid fa-file-pdf"></i>
+                </div>
+                <div class="cert-file-info">
+                  <div class="cert-file-name" id="cert-file-name">fssai_certificate.pdf</div>
+                  <div class="cert-file-meta" id="cert-file-meta">PDF Document • 2.4 MB • <span style="color: var(--color-success); font-weight: 700;">✓ Ready</span></div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-remove-cert" style="color: var(--color-danger); padding: 0.35rem 0.65rem;" title="Remove Certificate">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+              <p class="text-muted" style="font-size: 0.75rem; margin-top: 0.35rem;">
+                <i class="fa-solid fa-circle-info"></i> Admins will verify this certificate to approve your account. Customers can also view it to ensure purity & hygiene.
+              </p>
+            </div>
+
+            <div class="form-group">
+              <div class="flex items-center justify-between flex-wrap gap-2" style="margin-bottom: 0.5rem;">
+                <label class="form-label" style="margin-bottom: 0;">
+                  <i class="fa-solid fa-location-crosshairs" style="color: var(--theme-primary);"></i> Pin Farm Exact Location on Map
+                </label>
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-detect-auth-partner-gps" style="font-size: 0.8125rem;">
+                  <i class="fa-solid fa-crosshairs"></i> Use Live GPS Location
+                </button>
+              </div>
+              <div id="partner-map-picker"></div>
+              <div class="flex items-center justify-between text-muted" style="font-size: 0.75rem; margin-top: 0.35rem;">
+                <span><i class="fa-solid fa-circle-info"></i> Click or drag marker: Address, City, State & Pincode will be auto-detected.</span>
+                <span id="auth-partner-coords-display" style="font-family: monospace; color: var(--theme-primary); font-weight: 600;">19.0760° N, 72.8777° E</span>
+              </div>
+              <input type="hidden" id="partner-lat" value="19.0760">
+              <input type="hidden" id="partner-lng" value="72.8777">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="input-dairy-address">Physical Farm / Dairy Address (Full Street Address) <span style="color: var(--color-danger);">*</span></label>
+              <textarea id="input-dairy-address" class="form-textarea" rows="2" placeholder="Plot / House No, Gaushala Road, Locality, Village..."></textarea>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4" style="margin-top: 0.5rem;">
+              <div class="form-group">
+                <label class="form-label" for="input-dairy-city"><i class="fa-solid fa-city" style="color: var(--theme-primary);"></i> City / District</label>
+                <input type="text" id="input-dairy-city" class="form-input" placeholder="e.g. Pune">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="input-dairy-state"><i class="fa-solid fa-map-location-dot" style="color: var(--theme-primary);"></i> State</label>
+                <input type="text" id="input-dairy-state" class="form-input" placeholder="e.g. Maharashtra">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="input-dairy-pincode"><i class="fa-solid fa-location-pin" style="color: var(--theme-primary);"></i> Pincode</label>
+                <input type="text" id="input-dairy-pincode" class="form-input" placeholder="e.g. 411001" maxlength="10">
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn btn-primary w-full btn-lg" id="btn-auth-submit" style="margin-top: 1rem;">
+            <span><i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to Customer Portal</span>
+          </button>
+
+          <!-- Subtext Link to Switch Mode -->
+          <div id="auth-switch-footer" style="text-align: center; margin-top: 1.25rem; font-size: 0.875rem; color: var(--color-text-muted);">
+            Don't have an account yet? <a href="javascript:void(0)" onclick="switchAuthMode('register')" style="font-weight: 700; color: var(--theme-primary, #2563EB); text-decoration: underline;">Create an account</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: FORGOT PASSWORD & RESET CREDENTIALS -->
+  <div class="modal-overlay" id="forgot-password-modal">
+    <div class="modal-container" style="max-width: 520px;">
+      <div class="modal-header">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-key" style="color: var(--theme-primary, #2563EB); font-size: 1.2rem;"></i>
+          <h3 class="modal-title">Reset Password & Credentials</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeForgotPasswordModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem;">
+        
+        <!-- Step 1: Request OTP -->
+        <div id="forgot-step-1">
+          <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 1.25rem; line-height: 1.5;">
+            Enter the registered email address linked with your account. We will dispatch a 6-digit verification code to reset your password.
+          </p>
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label" for="forgot-input-email">Your Registered Email <span style="color: var(--color-danger);">*</span></label>
+            <div class="input-with-icon">
+              <i class="fa-solid fa-envelope"></i>
+              <input type="email" id="forgot-input-email" class="form-input" placeholder="e.g. name@example.com" required>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary w-full" id="btn-forgot-send-otp">
+            <i class="fa-solid fa-paper-plane"></i> Send Verification Code
+          </button>
+        </div>
+
+        <!-- Step 2: Enter OTP & Set New Password / Change Email -->
+        <div id="forgot-step-2" style="display: none;">
+          <div id="forgot-otp-banner" style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.8125rem; color: #1E40AF;">
+            <i class="fa-solid fa-circle-check" style="color: #2563EB;"></i> A 6-digit code has been sent to <strong id="forgot-confirmed-email"></strong>
+          </div>
+
+          <form id="form-forgot-reset">
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-label" for="forgot-input-otp">6-Digit Verification Code <span style="color: var(--color-danger);">*</span></label>
+              <input type="text" id="forgot-input-otp" class="form-input" placeholder="e.g. 482910" maxlength="6" style="font-size: 1.15rem; letter-spacing: 4px; font-weight: 700; text-align: center;" required>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-label" for="forgot-new-password">New Password <span style="color: var(--color-danger);">*</span></label>
+              <div class="pwd-wrapper input-with-icon">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="forgot-new-password" class="form-input" placeholder="Min. 6 characters" minlength="6" required>
+                <button type="button" class="btn-pwd-toggle" title="Show / Hide Password" aria-label="Toggle password visibility">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+              <div class="password-strength-bar" style="margin-top: 0.5rem;">
+                <div class="password-strength-fill" id="forgot-pass-strength-fill"></div>
+              </div>
+              <span class="password-strength-text" id="forgot-pass-strength-text" style="color: var(--color-text-muted); font-size: 0.72rem;">Strength: None</span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-label" for="forgot-confirm-password">Confirm New Password <span style="color: var(--color-danger);">*</span></label>
+              <div class="pwd-wrapper input-with-icon">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="forgot-confirm-password" class="form-input" placeholder="Re-type new password" minlength="6" required>
+                <button type="button" class="btn-pwd-toggle" title="Show / Hide Password" aria-label="Toggle password visibility">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Optional: Change to a new email too -->
+            <div class="form-group" style="background: #F8FAFC; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                <label class="form-label" for="forgot-change-email-input" style="margin-bottom: 0; font-size: 0.8125rem;">Also change login email to a new address? <span class="text-muted" style="font-weight: normal;">(Optional)</span></label>
+              </div>
+              <input type="email" id="forgot-change-email-input" class="form-input" placeholder="Leave empty to keep current email">
+            </div>
+
+            <div class="flex items-center gap-2 justify-end" style="padding-top: 0.75rem; border-top: 1px solid var(--color-border);">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="closeForgotPasswordModal()">Cancel</button>
+              <button type="submit" class="btn btn-primary btn-sm" id="btn-forgot-submit-reset">
+                <i class="fa-solid fa-circle-check"></i> Save & Update Credentials
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/translator.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/auth-page.js"></script>
+</body>
+</html>

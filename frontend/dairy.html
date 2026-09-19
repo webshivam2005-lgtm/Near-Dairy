@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dairy Profile & Fresh Milk Subscription — Near Dairy</title>
+  <meta name="description" content="View dairy details, fresh milk products, nutrition facts, customer reviews, and subscribe to doorstep daily milk delivery.">
+  <link rel="icon" type="image/svg+xml" href="img/logo-icon.svg">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- Razorpay Checkout Script -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/landing.css">
+  <style>
+    .spec-badge {
+      background: #F1F5F9;
+      padding: 0.28rem 0.65rem;
+      border-radius: var(--radius-md);
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--color-text);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      border: 1px solid var(--color-border);
+    }
+    .custom-day-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1.5px solid var(--color-border);
+      background: #FFFFFF;
+      font-weight: 700;
+      font-size: 0.875rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+    }
+    .custom-day-btn.selected {
+      background: var(--theme-primary);
+      color: #FFFFFF;
+      border-color: var(--theme-primary);
+    }
+  </style>
+</head>
+<body data-role="customer">
+
+  <!-- Top Navigation Bar -->
+  <header class="top-navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="brand-logo">
+        <img src="img/logo-icon.svg" alt="Near Dairy Logo" class="brand-icon-img">
+        <span class="brand-name"><span class="brand-name-primary">Near</span><span class="brand-name-accent">Dairy</span><span class="brand-name-dot"></span></span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link"><i class="fa-solid fa-arrow-left"></i> Back to Nearby Discovery</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <div class="translate-widget-slot"></div>
+        <div id="nav-auth-section" class="flex items-center gap-2">
+          <!-- Injected via Auth.initNavbar() -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-bottom: 5rem;">
+    <!-- Dairy Profile Header -->
+    <div id="dairy-profile-loading" class="empty-state" style="margin-top: 3rem;">
+      <div class="spinner"></div>
+      <p style="margin-top: 1rem; color: var(--color-text-muted);">Loading dairy farm details & fresh products...</p>
+    </div>
+
+    <div id="dairy-profile-content" style="display: none;">
+      <!-- Storefront Full View Banner & Info Container -->
+      <div class="storefront-hero-container">
+        <div class="storefront-banner-frame">
+          <img id="dairy-banner-img" class="storefront-banner-img" src="" alt="Dairy Storefront Banner">
+        </div>
+        <div class="storefront-info-card">
+          <div class="flex items-center justify-between flex-wrap gap-4" style="margin-bottom: 0.75rem;">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="badge badge-success" id="dairy-approved-badge"><i class="fa-solid fa-circle-check"></i> Certified Partner</span>
+              <span class="badge" style="background: #FEF3C7; color: #92400E; font-weight: 700;" id="dairy-rating-badge"><i class="fa-solid fa-star"></i> 4.9 (128 reviews)</span>
+              <span class="badge badge-primary" id="dairy-radius-badge"><i class="fa-solid fa-route"></i> Delivers up to 10 km</span>
+            </div>
+          </div>
+          <h1 class="storefront-title" id="dairy-name">Krishna Pure Dairy</h1>
+          <div class="storefront-meta-list">
+            <span><i class="fa-solid fa-location-dot" style="color: #EF4444;"></i> <span id="dairy-address">Kurla West, Mumbai</span></span>
+            <span><i class="fa-solid fa-phone" style="color: #2563EB;"></i> <span id="dairy-phone">+91 98192 34567</span></span>
+            <span><i class="fa-solid fa-certificate" style="color: #16A34A;"></i> FSSAI: <span id="dairy-fssai">11523998000124</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overview and Slots Row -->
+      <div class="grid grid-cols-3 gap-6" style="margin-bottom: 2.5rem;">
+        <div class="card" style="grid-column: span 2;">
+          <div class="card-body">
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">About This Dairy Farm</h3>
+            <p id="dairy-description" style="color: var(--color-text-muted); line-height: 1.6; font-size: 0.9375rem; margin-bottom: 1.25rem;">
+              Direct from grass-fed cows. Unadulterated farm-fresh milk delivered directly within hours of milking.
+            </p>
+            <div class="flex items-center gap-6" style="padding-top: 1rem; border-top: 1px solid var(--color-border); font-size: 0.875rem;">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-sun" style="color: #D97706; font-size: 1.25rem;"></i>
+                <div>
+                  <div style="font-weight: 600;">Morning Window</div>
+                  <div class="text-muted" id="dairy-morning-slot">05:30 AM - 07:30 AM</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-moon" style="color: #4F46E5; font-size: 1.25rem;"></i>
+                <div>
+                  <div style="font-weight: 600;">Evening Window</div>
+                  <div class="text-muted" id="dairy-evening-slot">05:30 PM - 07:30 PM</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body flex flex-col justify-between" style="gap: 1rem;">
+            <div>
+              <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
+                <h3 style="font-size: 1.125rem;"><i class="fa-solid fa-shield-heart" style="color: var(--color-success);"></i> Quality & Trust</h3>
+                <span class="badge badge-success" style="font-size: 0.7rem;"><i class="fa-solid fa-check-double"></i> Verified</span>
+              </div>
+              <p style="font-size: 0.8125rem; color: var(--color-text-muted); line-height: 1.5; margin-bottom: 0.85rem;">
+                Zero adulteration, natural farm chilling, sanitized packaging, and doorstep morning/evening deliveries.
+              </p>
+              <div id="dairy-cert-trust-box" style="display: none; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: var(--radius-md); padding: 0.65rem 0.85rem; margin-bottom: 0.75rem;">
+                <div class="flex items-center justify-between">
+                  <span style="font-size: 0.8125rem; font-weight: 700; color: #166534;">
+                    <i class="fa-solid fa-file-shield"></i> FSSAI / Quality License
+                  </span>
+                  <button type="button" class="btn btn-secondary btn-sm" id="btn-view-dairy-cert" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; color: #166534; font-weight: 700;">
+                    <i class="fa-solid fa-eye"></i> View Certificate
+                  </button>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-outline btn-sm w-full" onclick="document.getElementById('reviews-section').scrollIntoView({behavior:'smooth'})">
+              <i class="fa-solid fa-comments"></i> Read Customer Reviews
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fresh Products Catalog -->
+      <div style="margin-bottom: 3.5rem;">
+        <div class="flex items-center justify-between" style="margin-bottom: 1.5rem;">
+          <div>
+            <h2 style="font-size: 1.75rem;">Fresh Milk & Dairy Catalog</h2>
+            <p class="text-muted">Choose your preferred fresh milk variant for daily subscription or one-time delivery.</p>
+          </div>
+        </div>
+
+        <div class="product-grid" id="dairy-products-list">
+          <!-- Injected via dairy.js -->
+        </div>
+      </div>
+
+      <!-- Reviews Section -->
+      <div id="reviews-section" style="padding-top: 2.5rem; border-top: 1px solid var(--color-border);">
+        <div class="flex items-center justify-between flex-wrap gap-4" style="margin-bottom: 1.5rem;">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 style="font-size: 1.625rem; font-weight: 800;">Customer Reviews & Ratings</h2>
+              <span class="badge badge-success" style="font-size: 0.75rem;"><i class="fa-solid fa-circle-check"></i> 100% Verified</span>
+            </div>
+            <p class="text-muted" style="margin-top: 0.2rem;">Authentic feedback from daily subscribed neighborhood families.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btn-open-review-modal">
+            <i class="fa-solid fa-pen-to-square"></i> Write a Review
+          </button>
+        </div>
+
+        <!-- Rating Summary Scorecard & Breakdown -->
+        <div id="dairy-reviews-summary">
+          <!-- Injected via dairy.js -->
+        </div>
+
+        <div id="dairy-reviews-list">
+          <!-- Injected via dairy.js -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       MODAL: SUBSCRIPTION BUILDER & RAZORPAY CHECKOUT
+       ========================================================================== -->
+  <div class="modal-overlay" id="subscription-modal">
+    <div class="modal-container" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="sub-modal-title">Configure Milk Subscription</h3>
+        <button class="modal-close-btn" onclick="Modal.close('subscription-modal')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="subscription-form">
+          <input type="hidden" id="sub-product-id">
+          <input type="hidden" id="sub-dairy-id">
+          <input type="hidden" id="sub-product-price">
+
+          <!-- Product Summary Pill -->
+          <div class="card" style="background: var(--theme-bg); border-color: var(--theme-border); padding: 1rem; margin-bottom: 1.5rem;">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 id="sub-selected-product-name" style="font-size: 1.125rem;">Fresh Pure Cow Milk</h4>
+                <div class="text-muted" style="font-size: 0.8125rem;" id="sub-selected-product-specs">Fat: 4.2% | SNF: 8.5%</div>
+              </div>
+              <div style="font-size: 1.25rem; font-weight: 800; color: var(--theme-primary);" id="sub-selected-product-price">
+                ₹68.00 / Litre
+              </div>
+            </div>
+          </div>
+
+          <!-- 1. Frequency Selection -->
+          <div class="form-group">
+            <label class="form-label">Delivery Frequency</label>
+            <div class="grid grid-cols-3 gap-3">
+              <label class="card" style="padding: 0.75rem; text-align: center; cursor: pointer;">
+                <input type="radio" name="sub-frequency" value="daily" checked style="margin-bottom: 0.35rem;">
+                <div style="font-weight: 700; font-size: 0.875rem;">Daily</div>
+                <div class="text-muted" style="font-size: 0.75rem;">Every morning</div>
+              </label>
+              <label class="card" style="padding: 0.75rem; text-align: center; cursor: pointer;">
+                <input type="radio" name="sub-frequency" value="alternate" style="margin-bottom: 0.35rem;">
+                <div style="font-weight: 700; font-size: 0.875rem;">Alternate Days</div>
+                <div class="text-muted" style="font-size: 0.75rem;">Every 2nd day</div>
+              </label>
+              <label class="card" style="padding: 0.75rem; text-align: center; cursor: pointer;">
+                <input type="radio" name="sub-frequency" value="custom" style="margin-bottom: 0.35rem;">
+                <div style="font-weight: 700; font-size: 0.875rem;">Custom Days</div>
+                <div class="text-muted" style="font-size: 0.75rem;">Pick days</div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Custom Days Picker (Hidden by default) -->
+          <div class="form-group" id="custom-days-wrapper" style="display: none;">
+            <label class="form-label">Select Delivery Days</label>
+            <div class="flex items-center gap-2 justify-between">
+              <button type="button" class="custom-day-btn selected" data-day="Mon">M</button>
+              <button type="button" class="custom-day-btn selected" data-day="Tue">T</button>
+              <button type="button" class="custom-day-btn selected" data-day="Wed">W</button>
+              <button type="button" class="custom-day-btn selected" data-day="Thu">T</button>
+              <button type="button" class="custom-day-btn selected" data-day="Fri">F</button>
+              <button type="button" class="custom-day-btn selected" data-day="Sat">S</button>
+              <button type="button" class="custom-day-btn" data-day="Sun">S</button>
+            </div>
+          </div>
+
+          <!-- 2. Quantity & Time Slot -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="form-label" for="sub-quantity">Daily Quantity (Litres)</label>
+              <select id="sub-quantity" class="form-select">
+                <option value="0.5">0.5 Litre (500 ml)</option>
+                <option value="1" selected>1.0 Litre</option>
+                <option value="1.5">1.5 Litres</option>
+                <option value="2">2.0 Litres</option>
+                <option value="3">3.0 Litres</option>
+                <option value="5">5.0 Litres</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="sub-slot">Preferred Slot</label>
+              <select id="sub-slot" class="form-select">
+                <option value="morning" selected>Morning (5:30 AM - 7:30 AM)</option>
+                <option value="evening">Evening (5:30 PM - 7:30 PM)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 3. Start Date & Delivery Address -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="form-label" for="sub-start-date">Subscription Start Date</label>
+              <input type="date" id="sub-start-date" class="form-input" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Auto-Detect GPS Address</label>
+              <button type="button" class="btn btn-secondary w-full" id="btn-sub-detect-gps">
+                <i class="fa-solid fa-location-crosshairs"></i> Use GPS Pin
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="sub-address">Delivery Address</label>
+            <textarea id="sub-address" class="form-textarea" rows="2" placeholder="House/Flat No, Wing, Society Name, Street, Landmark..." required></textarea>
+          </div>
+
+          <!-- 4. Estimated Bill Calculation Box -->
+          <div class="card" style="background: #F8FAFC; padding: 1rem; margin-top: 1rem;">
+            <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
+              <span class="text-muted" style="font-size: 0.875rem;">Daily Dispatch Amount:</span>
+              <span style="font-weight: 700;" id="sub-daily-cost">₹68.00</span>
+            </div>
+            <div class="flex items-center justify-between" style="padding-top: 0.5rem; border-top: 1px solid var(--color-border);">
+              <span style="font-weight: 700; font-size: 1rem;">Est. Monthly Billing (30 Days):</span>
+              <span style="font-weight: 800; font-size: 1.25rem; color: var(--theme-primary);" id="sub-monthly-cost">₹2,040.00</span>
+            </div>
+          </div>
+
+          <!-- Razorpay Test Mode Badge -->
+          <div class="flex items-center justify-between" style="margin-top: 0.75rem; padding: 0.5rem 0.75rem; background: #EEF2FF; border-radius: var(--border-radius-sm); border: 1px dashed #A5B4FC;">
+            <div class="flex items-center gap-2" style="font-size: 0.8125rem; color: #3730A3;">
+              <i class="fa-solid fa-shield-halved" style="color: #4F46E5;"></i>
+              <span>Secured by <strong>Razorpay</strong> (Test Mode Active)</span>
+            </div>
+            <span class="badge" style="background: #E0E7FF; color: #3730A3; font-size: 0.7rem; font-weight: 700;">DEMO PAYMENTS</span>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="Modal.close('subscription-modal')">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btn-confirm-subscription">
+          <i class="fa-solid fa-lock"></i>
+          <span>Pay & Start Subscription</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL: WRITE REVIEW
+       ========================================================================== -->
+  <div class="modal-overlay" id="review-modal">
+    <div class="modal-container" style="max-width: 520px;">
+      <div class="modal-header">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-pen-nib" style="color: var(--theme-primary, #2563EB); font-size: 1.15rem;"></i>
+          <h3 class="modal-title">Write a Review</h3>
+        </div>
+        <button class="modal-close-btn" onclick="Modal.close('review-modal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem;">
+        <!-- Context Header Pill -->
+        <div class="review-modal-header-hero">
+          <div class="review-modal-dairy-icon">
+            <i class="fa-solid fa-cow"></i>
+          </div>
+          <div class="review-modal-dairy-info">
+            <h4 id="review-modal-dairy-name">Dairy Farm</h4>
+            <p><i class="fa-solid fa-circle-check"></i> Verified Neighborhood Dairy Partner</p>
+          </div>
+        </div>
+
+        <!-- Interactive Star Rating -->
+        <input type="hidden" id="review-rating" value="5">
+        <div class="star-rating-wrap">
+          <span class="star-rating-label">How was your milk quality & delivery?</span>
+          <div class="star-rating-stars" id="starRatingGroup">
+            <button type="button" class="star-rating-btn active" data-value="1" title="1 Star - Poor"><i class="fa-solid fa-star"></i></button>
+            <button type="button" class="star-rating-btn active" data-value="2" title="2 Stars - Below Average"><i class="fa-solid fa-star"></i></button>
+            <button type="button" class="star-rating-btn active" data-value="3" title="3 Stars - Average"><i class="fa-solid fa-star"></i></button>
+            <button type="button" class="star-rating-btn active" data-value="4" title="4 Stars - Very Good"><i class="fa-solid fa-star"></i></button>
+            <button type="button" class="star-rating-btn active" data-value="5" title="5 Stars - Exceptional Quality"><i class="fa-solid fa-star"></i></button>
+          </div>
+          <div>
+            <span class="star-feedback-badge" id="starFeedbackText">🌟 5 Stars — Exceptional Quality & Timing</span>
+          </div>
+        </div>
+
+        <!-- Quick Praise Suggestion Chips -->
+        <div class="quick-tags-wrap">
+          <div class="quick-tags-label">
+            <span>Quick Praise Highlights</span>
+            <span class="text-muted" style="font-size: 0.72rem; font-weight: 500;">(Click to add)</span>
+          </div>
+          <div class="quick-tags-cloud" id="reviewQuickTags">
+            <button type="button" class="quick-tag-chip" data-tag="🥛 100% Pure & Thick Cream">🥛 Pure & Thick Cream</button>
+            <button type="button" class="quick-tag-chip" data-tag="⏰ Punctual Morning Delivery">⏰ Punctual Morning Delivery</button>
+            <button type="button" class="quick-tag-chip" data-tag="🧊 Perfectly Chilled at 4°C">🧊 Fresh & Chilled</button>
+            <button type="button" class="quick-tag-chip" data-tag="🌿 Authentic A2 Desi Milk">🌿 Authentic A2 Milk</button>
+            <button type="button" class="quick-tag-chip" data-tag="🧼 Clean & Hygienic Glass Bottles">🧼 Hygienic Packaging</button>
+            <button type="button" class="quick-tag-chip" data-tag="🤝 Polite Delivery Partner">🤝 Friendly Service</button>
+          </div>
+        </div>
+
+        <!-- Detailed Feedback Input -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <div class="flex items-center justify-between" style="margin-bottom: 0.35rem;">
+            <label class="form-label" for="review-comment" style="margin-bottom: 0; font-weight: 700;">Detailed Feedback</label>
+            <span class="text-muted" id="reviewCharCount" style="font-size: 0.72rem;">0 / 500</span>
+          </div>
+          <textarea id="review-comment" class="form-textarea" rows="3" maxlength="500" placeholder="Share how fresh the milk tasted, boiling quality/malai, packaging, and morning delivery timing..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 1rem 1.5rem; background: #F8FAFC;">
+        <button class="btn btn-secondary" onclick="Modal.close('review-modal')">Cancel</button>
+        <button class="btn btn-primary" id="btn-submit-review">
+          <i class="fa-solid fa-paper-plane"></i> Submit Review
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL: CERTIFICATE VIEWER FOR CUSTOMER TRUST
+       ========================================================================== -->
+  <div class="modal-overlay" id="cert-viewer-modal">
+    <div class="modal-container" style="max-width: 820px;">
+      <div class="modal-header">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-circle-check" style="color: #16A34A; font-size: 1.25rem;"></i>
+          <h3 class="modal-title" id="cert-modal-title">Verified Dairy Farm Certificate & License</h3>
+        </div>
+        <button class="modal-close-btn" onclick="Modal.close('cert-viewer-modal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 1.25rem;">
+        <div class="cert-preview-frame-wrap" id="cert-viewer-frame-container">
+          <!-- Injected via JS -->
+        </div>
+        <div class="cert-verify-grid">
+          <div class="cert-verify-item">
+            <i class="fa-solid fa-circle-check"></i>
+            <div>
+              <div style="font-weight: 700; font-size: 0.8125rem;">FSSAI Compliant</div>
+              <div class="text-muted" style="font-size: 0.75rem;">Verified Gov License</div>
+            </div>
+          </div>
+          <div class="cert-verify-item">
+            <i class="fa-solid fa-cow"></i>
+            <div>
+              <div style="font-weight: 700; font-size: 0.8125rem;">Direct Farm Fresh</div>
+              <div class="text-muted" style="font-size: 0.75rem;">No Middlemen</div>
+            </div>
+          </div>
+          <div class="cert-verify-item">
+            <i class="fa-solid fa-shield-heart"></i>
+            <div>
+              <div style="font-weight: 700; font-size: 0.8125rem;">Pure & Unadulterated</div>
+              <div class="text-muted" style="font-size: 0.75rem;">Quality Audited</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a id="btn-cert-download" href="#" target="_blank" download class="btn btn-secondary btn-sm">
+          <i class="fa-solid fa-download"></i> Download Document
+        </a>
+        <button class="btn btn-primary btn-sm" onclick="Modal.close('cert-viewer-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL: PRODUCT DETAILS & FULL DESCRIPTION VIEWER
+       ========================================================================== -->
+  <div class="modal-overlay" id="product-detail-modal">
+    <div class="modal-container" style="max-width: 640px;">
+      <div class="modal-header">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-bottle-droplet" style="color: var(--theme-primary, #2563EB); font-size: 1.2rem;"></i>
+          <h3 class="modal-title" id="prod-detail-modal-title">Product Details</h3>
+        </div>
+        <button class="modal-close-btn" onclick="Modal.close('product-detail-modal')">&times;</button>
+      </div>
+      <div class="modal-body" id="prod-detail-modal-body" style="padding: 1.5rem;">
+        <!-- Injected via dairy.js -->
+      </div>
+      <div class="modal-footer" id="prod-detail-modal-footer">
+        <!-- Injected via dairy.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/translator.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/dairy.js"></script>
+</body>
+</html>

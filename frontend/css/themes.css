@@ -1,0 +1,59 @@
+/* ==========================================================================
+   NEAR DAIRY - ROLE-SPECIFIC COLOR THEMES
+   ========================================================================== */
+
+/* 1. Customer Theme (Default / Blue) */
+:root,
+body[data-role="customer"],
+.theme-customer {
+  --theme-primary: #2563EB;
+  --theme-primary-light: #60A5FA;
+  --theme-action: #1D4ED8;
+  --theme-bg: #EFF6FF;
+  --theme-border: #BFDBFE;
+  --theme-accent: #0284C7;
+  --theme-gradient: linear-gradient(135deg, #2563EB 0%, #0284C7 100%);
+  --theme-badge-bg: #DBEAFE;
+  --theme-badge-color: #1E40AF;
+}
+
+/* 2. Dairy Partner Theme (Green) */
+body[data-role="partner"],
+.theme-partner {
+  --theme-primary: #16A34A;
+  --theme-primary-light: #4ADE80;
+  --theme-action: #15803D;
+  --theme-bg: #F0FDF4;
+  --theme-border: #BBF7D0;
+  --theme-accent: #059669;
+  --theme-gradient: linear-gradient(135deg, #16A34A 0%, #059669 100%);
+  --theme-badge-bg: #DCFCE7;
+  --theme-badge-color: #166534;
+}
+
+/* 3. Admin Theme (Purple) */
+body[data-role="admin"],
+.theme-admin {
+  --theme-primary: #7C3AED;
+  --theme-primary-light: #A78BFA;
+  --theme-action: #6D28D9;
+  --theme-bg: #FAF5FF;
+  --theme-border: #DDD6FE;
+  --theme-accent: #9333EA;
+  --theme-gradient: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%);
+  --theme-badge-bg: #F3E8FF;
+  --theme-badge-color: #581C87;
+}
+
+/* Dynamic active state highlights based on active role */
+.role-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--theme-badge-bg);
+  color: var(--theme-badge-color);
+  border: 1px solid var(--theme-border);
+}

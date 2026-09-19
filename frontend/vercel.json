@@ -1,0 +1,10 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/partner", "destination": "/partner-dashboard.html" },
+    { "source": "/customer", "destination": "/customer-dashboard.html" },
+    { "source": "/admin", "destination": "/admin-dashboard.html" },
+    { "source": "/auth", "destination": "/auth.html" },
+    { "source": "/dairy/:id", "destination": "/dairy.html" }
+  ]
+}

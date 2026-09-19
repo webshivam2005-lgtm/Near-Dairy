@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Control Center — Near Dairy</title>
+  <link rel="icon" type="image/svg+xml" href="img/logo-icon.svg">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/support.css">
+</head>
+<body data-role="admin">
+
+  <div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="brand-logo">
+          <img src="img/logo-icon.svg" alt="Near Dairy Logo" class="brand-icon-img">
+          <span class="brand-name"><span class="brand-name-primary">Near</span><span class="brand-name-accent">Dairy</span><span class="brand-name-dot"></span></span>
+        </a>
+        <button class="sidebar-close-btn" data-action="close-sidebar" aria-label="Close Sidebar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div style="padding: 0.75rem 1rem 0;">
+        <span class="role-badge" style="background:#F3E8FF; color:#581C87; border-color:#DDD6FE;">SuperAdmin</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="sidebar-item active" data-tab="overview">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Platform Overview</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="vetting">
+          <i class="fa-solid fa-user-check"></i>
+          <span>Partner Vetting Queue</span>
+          <span class="sidebar-badge" id="badge-pending-count" style="background:#DC2626;">0</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="dairies">
+          <i class="fa-solid fa-store"></i>
+          <span>Dairies Directory</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="users">
+          <i class="fa-solid fa-users-gear"></i>
+          <span>User Accounts</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="disputes">
+          <i class="fa-solid fa-headset"></i>
+          <span>Support & Helpdesk</span>
+          <span class="sidebar-badge" id="badge-disputes-count" style="background:#DC2626;">0</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="financials">
+          <i class="fa-solid fa-coins"></i>
+          <span>Platform Fees & Revenue</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="exports">
+          <i class="fa-solid fa-file-csv"></i>
+          <span>Data Exports & CSV</span>
+          <span class="sidebar-badge" style="background:#059669; font-size:0.65rem;">CSV</span>
+        </button>
+
+        <button class="sidebar-item" data-tab="settings">
+          <i class="fa-solid fa-gear"></i>
+          <span>Admin & Platform Settings</span>
+        </button>
+
+        <div style="height: 1px; background: var(--color-border); margin: 0.75rem 0;"></div>
+
+        <a href="index.html" target="_blank" class="sidebar-item">
+          <i class="fa-solid fa-globe"></i>
+          <span>Customer Marketplace</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-widget">
+          <img id="sidebar-user-avatar" src="https://api.dicebear.com/7.x/initials/svg?seed=Admin" class="user-avatar" alt="Avatar">
+          <div class="user-info">
+            <div class="user-name" id="sidebar-user-name">Administrator</div>
+            <div class="user-role-tag">Near Dairy Platform</div>
+          </div>
+          <button onclick="Auth.logout()" class="btn btn-icon btn-secondary btn-sm" title="Log Out">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="dashboard-main">
+      <header class="dashboard-topbar">
+        <div class="dashboard-topbar-left">
+          <button class="mobile-sidebar-toggle-btn" data-action="toggle-sidebar" aria-label="Open Navigation Menu">
+            <i class="fa-solid fa-bars-staggered"></i>
+          </button>
+          <div class="dashboard-page-title">
+            <h2 id="topbar-title">Platform Overview & Metrics</h2>
+            <p class="text-muted" style="font-size: 0.875rem;">Manage partner approvals, platform gross volume, and dispute resolutions.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-topbar-actions flex items-center gap-3">
+          <div class="translate-widget-slot"></div>
+          <button class="btn btn-secondary btn-sm" id="btn-refresh-admin">
+            <i class="fa-solid fa-rotate-right"></i> Refresh Data
+          </button>
+        </div>
+      </header>
+
+      <div class="dashboard-content-body">
+        <!-- TAB 1: OVERVIEW -->
+        <div class="tab-panel active" id="tab-overview">
+          <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 2rem;">
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Active Dairies</div>
+                <div class="stat-value" id="stat-approved-dairies">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#F0FDF4; color:#16A34A;"><i class="fa-solid fa-cow"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Active Subscribers</div>
+                <div class="stat-value" id="stat-subscribers">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#EFF6FF; color:#2563EB;"><i class="fa-solid fa-users"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Platform Fees Revenue</div>
+                <div class="stat-value" style="color: #7C3AED;" id="stat-platform-fees">₹0.00</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#FAF5FF; color:#7C3AED;"><i class="fa-solid fa-coins"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Monthly Gross GMV</div>
+                <div class="stat-value" id="stat-subscription-gross">₹0.00</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#ECFDF5; color:#059669;"><i class="fa-solid fa-chart-line"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Est. Daily Litres</div>
+                <div class="stat-value" id="stat-litres">0.0 L</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#FFFBEB; color:#D97706;"><i class="fa-solid fa-glass-water"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Pending Dairies</div>
+                <div class="stat-value" style="color: var(--color-danger);" id="stat-pending-dairies">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#FEF2F2; color:#DC2626;"><i class="fa-solid fa-hourglass-half"></i></div>
+            </div>
+          </div>
+
+          <!-- Quick Action Row: Pending Applications Banner -->
+          <div class="card" style="margin-bottom: 2rem; border-left: 4px solid var(--theme-primary);">
+            <div class="card-body flex items-center justify-between" style="flex-wrap: wrap; gap: 1rem;">
+              <div style="flex: 1; min-width: 220px;">
+                <h3 style="font-size: 1.125rem; margin-bottom: 0.25rem;">Dairy Partner Verification Queue</h3>
+                <p class="text-muted" style="font-size: 0.875rem;">New dairy businesses requiring identity, address, and FSSAI certificate review.</p>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="document.querySelector('.sidebar-item[data-tab=\'vetting\']').click()" style="white-space: nowrap; flex-shrink: 0;">
+                Review Pending Dairies (<span id="btn-quick-pending-count">0</span>)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: PARTNER VETTING QUEUE -->
+        <div class="tab-panel" id="tab-vetting">
+          <div class="flex items-center justify-between" style="margin-bottom: 1.5rem;">
+            <div>
+              <h3 style="font-size: 1.25rem;">Dairy Partner Applications Awaiting Approval</h3>
+              <p class="text-muted">Approved dairies immediately appear in customer-facing nearby search results.</p>
+            </div>
+          </div>
+
+          <div class="dairy-cards-container" id="vetting-queue-container">
+            <!-- Injected via admin.js -->
+          </div>
+        </div>
+
+        <!-- TAB 3: DAIRIES DIRECTORY -->
+        <div class="tab-panel" id="tab-dairies">
+          <div class="card">
+            <div class="card-header">
+              <h3 style="font-size: 1.125rem;">All Registered Dairy Partners</h3>
+            </div>
+            <div class="card-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Dairy Name</th>
+                      <th>Owner</th>
+                      <th>FSSAI License</th>
+                      <th>Delivery Radius</th>
+                      <th>Platform Fee</th>
+                      <th>Approval Status</th>
+                      <th>Active Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="all-dairies-tbody">
+                    <!-- Injected via admin.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: USERS DIRECTORY -->
+        <div class="tab-panel" id="tab-users">
+          <div class="card">
+            <div class="card-header">
+              <h3 style="font-size: 1.125rem;">All Platform Accounts</h3>
+            </div>
+            <div class="card-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Role</th>
+                      <th>Registered On</th>
+                    </tr>
+                  </thead>
+                  <tbody id="all-users-tbody">
+                    <!-- Injected via admin.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 5: SUPPORT & LIVE HELPDESK HUB -->
+        <div class="tab-panel" id="tab-disputes">
+          
+          <!-- Top Helpdesk Metrics Grid -->
+          <div class="helpdesk-metrics-grid">
+            <div class="helpdesk-metric-card">
+              <div>
+                <div class="helpdesk-metric-label">Customer Issues</div>
+                <div class="helpdesk-metric-val" id="stat-helpdesk-cust-open" style="color: #2563EB;">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#EFF6FF; color:#2563EB;"><i class="fa-solid fa-users"></i></div>
+            </div>
+
+            <div class="helpdesk-metric-card">
+              <div>
+                <div class="helpdesk-metric-label">Partner Inquiries</div>
+                <div class="helpdesk-metric-val" id="stat-helpdesk-partner-open" style="color: #059669;">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#ECFDF5; color:#059669;"><i class="fa-solid fa-store"></i></div>
+            </div>
+
+            <div class="helpdesk-metric-card">
+              <div>
+                <div class="helpdesk-metric-label">Urgent / High Priority</div>
+                <div class="helpdesk-metric-val" id="stat-helpdesk-urgent" style="color: #DC2626;">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#FEF2F2; color:#DC2626;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            </div>
+
+            <div class="helpdesk-metric-card">
+              <div>
+                <div class="helpdesk-metric-label">Total Resolved</div>
+                <div class="helpdesk-metric-val" id="stat-helpdesk-resolved" style="color: #16A34A;">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#F0FDF4; color:#16A34A;"><i class="fa-solid fa-circle-check"></i></div>
+            </div>
+          </div>
+
+          <!-- Helpdesk Header & Action Bar -->
+          <div class="flex items-center justify-between flex-wrap gap-3" style="margin-bottom: 0.75rem;">
+            <div>
+              <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.2rem;">
+                <i class="fa-solid fa-headset" style="color: var(--theme-primary);"></i> Support & Helpdesk Hub — Live Communication Center
+              </h3>
+              <p class="text-muted" style="font-size: 0.84rem;">Direct two-way live chatting, problem solving, and complaint resolution for partners and customers.</p>
+            </div>
+            <div class="helpdesk-top-actions flex items-center gap-2 flex-wrap">
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-refresh-helpdesk">
+                <i class="fa-solid fa-rotate-right"></i> Refresh Feed
+              </button>
+              <button type="button" class="btn btn-primary btn-sm" id="btn-admin-open-new-ticket" style="background: var(--theme-primary); border-color: var(--theme-primary);">
+                <i class="fa-solid fa-paper-plane"></i> New Ticket / Message
+              </button>
+            </div>
+          </div>
+
+          <!-- Split-Screen Interactive Helpdesk Workspace -->
+          <div class="helpdesk-workspace">
+            
+            <!-- LEFT PANEL: TICKET QUEUE & FILTER PILLS -->
+            <div class="helpdesk-queue-panel">
+              <div class="helpdesk-queue-header">
+                <div class="helpdesk-search-wrap">
+                  <i class="fa-solid fa-magnifying-glass helpdesk-search-icon"></i>
+                  <input type="text" id="helpdesk-search-input" class="helpdesk-search-input" placeholder="Search ticket #, name, subject...">
+                </div>
+                <div class="helpdesk-filter-pills">
+                  <button type="button" class="filter-pill-btn active" data-filter="all">All (<span id="count-pill-all">0</span>)</button>
+                  <button type="button" class="filter-pill-btn" data-filter="customer">👥 Customers (<span id="count-pill-cust">0</span>)</button>
+                  <button type="button" class="filter-pill-btn" data-filter="partner">🥛 Partners (<span id="count-pill-partner">0</span>)</button>
+                  <button type="button" class="filter-pill-btn" data-filter="urgent">⚡ Urgent (<span id="count-pill-urgent">0</span>)</button>
+                  <button type="button" class="filter-pill-btn" data-filter="resolved">✓ Resolved</button>
+                </div>
+              </div>
+
+              <!-- Ticket Cards Stream -->
+              <div class="helpdesk-ticket-list" id="helpdesk-ticket-list">
+                <div class="text-center text-muted" style="padding: 2.5rem 1rem;">
+                  <div class="spinner" style="width: 24px; height: 24px; margin: 0 auto 0.75rem;"></div>
+                  Loading active tickets...
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT PANEL: LIVE CHAT & RESOLUTION WORKSPACE -->
+            <div class="helpdesk-chat-panel">
+              
+              <!-- Empty State when no ticket is selected -->
+              <div class="chat-empty-state" id="helpdesk-chat-empty">
+                <div class="chat-empty-icon">
+                  <i class="fa-solid fa-comments"></i>
+                </div>
+                <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.35rem;">Select a Ticket to Open Live Chat</h3>
+                <p style="font-size: 0.85rem; max-width: 360px;">
+                  Choose any customer or dairy partner support request on the left to review details, chat in real-time, and log resolutions.
+                </p>
+              </div>
+
+              <!-- Active Chat Container -->
+              <div id="helpdesk-chat-container" style="display: none; flex-direction: column; height: 100%;">
+                
+                <!-- Chat Top Header -->
+                <div class="helpdesk-chat-header">
+                  <div class="chat-header-user-meta">
+                    <img id="chat-user-avatar" src="https://api.dicebear.com/7.x/initials/svg?seed=User" class="chat-header-avatar" alt="Avatar">
+                    <div>
+                      <div class="chat-header-title">
+                        <span id="chat-user-name">User Name</span>
+                        <span id="chat-user-role-badge" class="ticket-user-role-tag role-partner-tag">Partner</span>
+                        <span id="chat-ticket-number" class="ticket-number-badge">TKT-1001</span>
+                      </div>
+                      <div class="chat-header-subtitle">
+                        <span id="chat-user-email">email@example.com</span> &bull; 
+                        <span id="chat-user-phone">+91 00000 00000</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="chat-header-actions" style="flex-wrap: wrap; gap: 0.4rem;">
+                    <a id="btn-chat-call-user" href="tel:" class="btn btn-secondary btn-sm" title="Call User Directly" style="white-space: nowrap;">
+                      <i class="fa-solid fa-phone" style="color: #16A34A;"></i> Call
+                    </a>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-chat-copy-info" title="Copy Contact Details">
+                      <i class="fa-solid fa-copy"></i>
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-chat-change-status" title="Change Ticket Status" style="white-space: nowrap;">
+                      <span id="chat-current-status-badge" class="ticket-status-pill status-open">Open</span>
+                    </button>
+                    <button type="button" class="btn btn-primary btn-sm" id="btn-chat-resolve" style="background: #16A34A; border-color: #16A34A; white-space: nowrap; flex-shrink: 0;">
+                      <i class="fa-solid fa-check"></i> Mark Resolved
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Chat Context Bar -->
+                <div class="chat-context-bar">
+                  <div class="chat-context-item">
+                    <i class="fa-solid fa-tag" style="color: var(--theme-primary);"></i>
+                    <span>Category: <strong id="chat-context-category">General</strong></span>
+                  </div>
+                  <div class="chat-context-item" id="chat-context-dairy-wrap">
+                    <i class="fa-solid fa-store" style="color: #059669;"></i>
+                    <span>Associated Dairy: <strong id="chat-context-dairy">Direct</strong></span>
+                  </div>
+                  <div class="chat-context-item">
+                    <i class="fa-solid fa-flag" style="color: #DC2626;"></i>
+                    <span>Priority: <strong id="chat-context-priority">Medium</strong></span>
+                  </div>
+                  <div class="chat-context-item">
+                    <i class="fa-solid fa-clock" style="color: var(--color-text-muted);"></i>
+                    <span>Created: <strong id="chat-context-created">Today</strong></span>
+                  </div>
+                </div>
+
+                <!-- Live Messages Feed -->
+                <div class="chat-messages-stream" id="helpdesk-messages-stream">
+                  <!-- Injected via admin.js -->
+                </div>
+
+                <!-- Quick Canned Responses Bar -->
+                <div class="quick-canned-bar">
+                  <span class="text-muted" style="font-size: 0.72rem; font-weight: 700; white-space: nowrap;"><i class="fa-solid fa-bolt" style="color: #D97706;"></i> Quick Replies:</span>
+                  <button type="button" class="canned-chip" data-text="Hello! We are investigating this issue with our dispatch team right away.">⚡ Investigating now</button>
+                  <button type="button" class="canned-chip" data-text="Your billing adjustment credit has been processed successfully.">💳 Credit processed</button>
+                  <button type="button" class="canned-chip" data-text="We have contacted the dairy partner to ensure prompt delivery for tomorrow morning.">🥛 Dairy notified</button>
+                  <button type="button" class="canned-chip" data-text="Could you please share a clear photo of the delivered bottle / packet?">📷 Request photo</button>
+                  <button type="button" class="canned-chip" data-text="This issue has been resolved. Please let us know if you need any further assistance!">✓ Resolved message</button>
+                </div>
+
+                <!-- Chat Composer -->
+                <div class="helpdesk-chat-composer">
+                  <form id="form-admin-chat-composer">
+                    <!-- Attachment Preview Slot -->
+                    <div id="admin-attachment-preview" class="composer-attachment-preview" style="display: none;">
+                      <i class="fa-solid fa-paperclip" style="color: var(--theme-primary);"></i>
+                      <span id="admin-attachment-name" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">attachment.jpg</span>
+                      <button type="button" id="btn-admin-remove-attachment" style="border: none; background: transparent; cursor: pointer; color: var(--color-danger); font-size: 0.85rem;">&times;</button>
+                    </div>
+
+                    <div class="composer-input-row">
+                      <textarea id="admin-chat-input" class="composer-textarea" rows="1" placeholder="Type a reply to customer or partner... (Press Enter to Send)"></textarea>
+                      
+                      <div class="composer-actions">
+                        <input type="file" id="admin-chat-file-input" style="display: none;" accept="image/*, application/pdf">
+                        <button type="button" class="btn btn-secondary btn-icon" id="btn-admin-choose-file" title="Attach Image or Document" style="width: 42px; height: 42px;">
+                          <i class="fa-solid fa-paperclip"></i>
+                        </button>
+                        <button type="submit" class="btn-composer-send" id="btn-admin-send-msg" title="Send Message (Enter)">
+                          <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- TAB 6: PLATFORM FEES & FINANCIAL SETTLEMENTS -->
+        <div class="tab-panel" id="tab-financials">
+          <div class="stats-grid" style="margin-bottom: 1.75rem;">
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Active Subscriptions</div>
+                <div class="stat-value" id="fin-active-subs">0</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#EFF6FF; color:#2563EB;"><i class="fa-solid fa-users"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Total Platform Fees Earned</div>
+                <div class="stat-value" style="color: #7C3AED;" id="fin-total-platform-fees">₹0.00</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#FAF5FF; color:#7C3AED;"><i class="fa-solid fa-coins"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Monthly Gross Value</div>
+                <div class="stat-value" id="fin-monthly-gross">₹0.00</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#F0FDF4; color:#16A34A;"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+            </div>
+
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Net Partner Settlements</div>
+                <div class="stat-value" style="color: #059669;" id="fin-partner-payouts">₹0.00</div>
+              </div>
+              <div class="stat-icon-wrap" style="background:#ECFDF5; color:#059669;"><i class="fa-solid fa-wallet"></i></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header flex items-center justify-between" style="flex-wrap: wrap; gap: 0.75rem;">
+              <div style="flex: 1; min-width: 200px;">
+                <h3 style="font-size: 1.125rem;"><i class="fa-solid fa-file-invoice-dollar" style="color: #7C3AED;"></i> Dairy Partner Subscriptions & Platform Fee Deductions</h3>
+                <p class="text-muted" style="font-size: 0.8125rem;">Standard Platform Fee is ₹50.00 per active customer subscription, deducted at source before partner settlement.</p>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-refresh-financials" style="white-space: nowrap; flex-shrink: 0;">
+                <i class="fa-solid fa-rotate-right"></i> Refresh Financials
+              </button>
+            </div>
+            <div class="card-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Dairy Partner</th>
+                      <th>Customer</th>
+                      <th>Subscribed Milk</th>
+                      <th>Quantity & Slot</th>
+                      <th>Monthly Gross</th>
+                      <th>Platform Fee</th>
+                      <th>Net Partner Payout</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="all-financials-tbody">
+                    <!-- Injected via admin.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 7: ADMIN & PLATFORM SETTINGS -->
+        <div class="tab-panel" id="tab-settings">
+          
+          <!-- 1. SuperAdmin Profile & Full Name -->
+          <div class="settings-section-card">
+            <div class="settings-card-header">
+              <h3><i class="fa-solid fa-user-shield" style="color: #7C3AED;"></i> SuperAdmin Profile & Full Name</h3>
+              <span class="badge" style="background:#F3E8FF; color:#581C87; border: 1px solid #DDD6FE;"><i class="fa-solid fa-crown"></i> Master Admin</span>
+            </div>
+            <div class="settings-card-body">
+              <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 1.25rem;">
+                Your display name is shown on audit logs, approval notices sent to dairy partners, and the admin control bar.
+              </p>
+              <form id="form-admin-change-name">
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="form-group">
+                    <label class="form-label" for="settings-admin-fullname">Admin Full Name <span style="color: var(--color-danger);">*</span></label>
+                    <input type="text" id="settings-admin-fullname" class="form-input" placeholder="e.g. Near Dairy SuperAdmin" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="settings-admin-phone">Contact Mobile</label>
+                    <input type="tel" id="settings-admin-phone" class="form-input" placeholder="+91 99999 00001">
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between flex-wrap gap-3" style="padding-top: 1rem; border-top: 1px solid var(--color-border); margin-top: 0.5rem;">
+                  <span class="text-muted" style="font-size: 0.78rem;"><i class="fa-solid fa-shield-halved" style="color: #7C3AED;"></i> Changes take effect immediately across all admin sessions.</span>
+                  <button type="submit" class="btn btn-primary btn-sm" id="btn-admin-update-name" style="background: #7C3AED; border-color: #6D28D9;">
+                    <i class="fa-solid fa-floppy-disk"></i> Update Admin Name
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 2. SuperAdmin Login Email & Credentials -->
+          <div class="settings-section-card">
+            <div class="settings-card-header">
+              <h3><i class="fa-solid fa-envelope" style="color: #7C3AED;"></i> SuperAdmin Login Email</h3>
+              <span class="badge" style="background:#F3E8FF; color:#581C87; border: 1px solid #DDD6FE;"><i class="fa-solid fa-crown"></i> SuperAdmin Identity</span>
+            </div>
+            <div class="settings-card-body">
+              <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 1.25rem;">
+                This email is used for SuperAdmin dashboard login, system alerts, and critical escalation notices.
+              </p>
+              <form id="form-admin-change-email">
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="form-group">
+                    <label class="form-label" for="settings-admin-current-email">Current Admin Email</label>
+                    <input type="email" id="settings-admin-current-email" class="form-input" readonly style="background: #F1F5F9; color: var(--color-text);">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="settings-admin-new-email">New Admin Email <span style="color: var(--color-danger);">*</span></label>
+                    <input type="email" id="settings-admin-new-email" class="form-input" placeholder="e.g. admin@neardairy.com" required>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between flex-wrap gap-3" style="padding-top: 1rem; border-top: 1px solid var(--color-border); margin-top: 0.5rem;">
+                  <span class="text-muted" style="font-size: 0.78rem;"><i class="fa-solid fa-shield-halved" style="color: #7C3AED;"></i> Database & JWT token synchronized on save.</span>
+                  <button type="submit" class="btn btn-primary btn-sm" id="btn-admin-update-email" style="background: #7C3AED; border-color: #6D28D9;">
+                    <i class="fa-solid fa-envelope-circle-check"></i> Update Admin Email
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 2. Master Password & Credential Security -->
+          <div class="settings-section-card">
+            <div class="settings-card-header">
+              <h3><i class="fa-solid fa-lock" style="color: #D97706;"></i> Master Password & Security</h3>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-admin-forgot-password" style="font-size: 0.78rem;">
+                <i class="fa-solid fa-key"></i> Send Reset Link
+              </button>
+            </div>
+            <div class="settings-card-body">
+              <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 1.25rem;">
+                Maintain high-grade password security for platform-wide administrative controls and partner approvals.
+              </p>
+              <form id="form-admin-change-password">
+                <div class="grid grid-cols-3 gap-4">
+                  <div class="form-group">
+                    <label class="form-label" for="settings-admin-current-password">Current Password</label>
+                    <div class="password-input-wrap">
+                      <input type="password" id="settings-admin-current-password" class="form-input" placeholder="••••••••">
+                      <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('settings-admin-current-password', this)">
+                        <i class="fa-regular fa-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="settings-admin-new-password">New Master Password <span style="color: var(--color-danger);">*</span></label>
+                    <div class="password-input-wrap">
+                      <input type="password" id="settings-admin-new-password" class="form-input" placeholder="Min. 8 characters" minlength="8" required>
+                      <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('settings-admin-new-password', this)">
+                        <i class="fa-regular fa-eye"></i>
+                      </button>
+                    </div>
+                    <div class="password-strength-bar">
+                      <div class="password-strength-fill" id="admin-password-strength-fill"></div>
+                    </div>
+                    <span class="password-strength-text" id="admin-password-strength-text" style="color: var(--color-text-muted);">Strength: None</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="settings-admin-confirm-password">Confirm Master Password <span style="color: var(--color-danger);">*</span></label>
+                    <div class="password-input-wrap">
+                      <input type="password" id="settings-admin-confirm-password" class="form-input" placeholder="Re-type new password" minlength="8" required>
+                      <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('settings-admin-confirm-password', this)">
+                        <i class="fa-regular fa-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between flex-wrap gap-3" style="padding-top: 1rem; border-top: 1px solid var(--color-border); margin-top: 0.5rem;">
+                  <span class="text-muted" style="font-size: 0.78rem;"><i class="fa-solid fa-lock" style="color: #7C3AED;"></i> SuperAdmin credentials are protected by service-role authentication.</span>
+                  <button type="submit" class="btn btn-primary btn-sm" id="btn-admin-update-password" style="background: #7C3AED; border-color: #6D28D9;">
+                    <i class="fa-solid fa-shield-halved"></i> Save New Master Password
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 3. Global Platform Rules & Automation Settings -->
+          <div class="settings-section-card">
+            <div class="settings-card-header">
+              <h3><i class="fa-solid fa-sliders" style="color: #2563EB;"></i> Platform Global Automation & Fee Policy</h3>
+              <span class="badge badge-success">Active Policy</span>
+            </div>
+            <div class="settings-card-body">
+              <form id="form-admin-platform-settings">
+                <div class="grid grid-cols-2 gap-4" style="margin-bottom: 1rem;">
+                  <div class="form-group">
+                    <label class="form-label" for="setting-platform-fee">Default Platform Fee per Active Subscription (₹)</label>
+                    <input type="number" id="setting-platform-fee" class="form-input" value="50" min="0" step="1" required>
+                    <span class="text-muted" style="font-size: 0.75rem;">Flat monthly fee deducted per customer subscription at source.</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="setting-payout-cycle">Automated Partner Settlement Cycle</label>
+                    <select id="setting-payout-cycle" class="form-select">
+                      <option value="monthly" selected>Monthly (1st of Every Month)</option>
+                      <option value="biweekly">Bi-Weekly (1st & 15th)</option>
+                      <option value="weekly">Weekly (Every Monday)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="toggle-switch-wrap">
+                  <div class="toggle-switch-label-group">
+                    <div class="toggle-switch-icon" style="background:#FAF5FF; color:#7C3AED;">
+                      <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                      <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">AI Document Pre-Vetting</div>
+                      <div class="text-muted" style="font-size: 0.8125rem;">Automatically analyze uploaded FSSAI certificates using OCR before admin manual review.</div>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="admin-pref-ai-vetting" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-switch-wrap">
+                  <div class="toggle-switch-label-group">
+                    <div class="toggle-switch-icon" style="background:#F0FDF4; color:#16A34A;">
+                      <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div>
+                      <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">Automated Customer WhatsApp Gateway</div>
+                      <div class="text-muted" style="font-size: 0.8125rem;">Send automated morning dispatch and billing receipts via official WhatsApp Business API.</div>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="admin-pref-whatsapp-gw" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+
+                <div class="flex items-center justify-end" style="padding-top: 1.25rem; margin-top: 0.5rem;">
+                  <button type="submit" class="btn btn-primary btn-sm" id="btn-save-platform-settings" style="background: #7C3AED; border-color: #6D28D9;">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Platform Configurations
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 4. Active Sessions -->
+          <div class="settings-section-card">
+            <div class="settings-card-header">
+              <h3><i class="fa-solid fa-laptop-code" style="color: #0284C7;"></i> Active Admin Sessions</h3>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-admin-logout-all" style="color: var(--color-danger); border-color: #FECACA;">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Terminate Other Admin Sessions
+              </button>
+            </div>
+            <div class="settings-card-body">
+              <div class="session-device-item">
+                <div class="session-device-info">
+                  <div class="session-device-icon" style="background: #F3E8FF; color: #7C3AED;">
+                    <i class="fa-solid fa-desktop"></i>
+                  </div>
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.9375rem; color: var(--color-text);">Chrome on Windows (SuperAdmin Root)</div>
+                    <div class="text-muted" style="font-size: 0.78rem;">Primary Control Terminal • Pune HQ</div>
+                  </div>
+                </div>
+                <span class="badge badge-success" style="font-size: 0.72rem;"><i class="fa-solid fa-circle"></i> Active Master Session</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB 8: CSV DATA EXPORTS & ANALYTICS HUB -->
+        <div class="tab-panel" id="tab-exports">
+          
+          <!-- Top Analytics Control Banner -->
+          <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, #FAF5FF 0%, #FFFFFF 100%); border: 1.5px solid #DDD6FE;">
+            <div class="card-body" style="padding: 1.5rem;">
+              <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <div class="flex items-center gap-2" style="margin-bottom: 0.25rem;">
+                    <span class="badge" style="background: #7C3AED; color: #FFFFFF; font-weight: 700; font-size: 0.72rem;">
+                      <i class="fa-solid fa-database"></i> BI & Data Analytics
+                    </span>
+                    <span class="badge badge-success" style="font-size: 0.72rem;">
+                      <i class="fa-solid fa-bolt"></i> Live SQL Data Sync
+                    </span>
+                  </div>
+                  <h3 style="font-size: 1.35rem; font-weight: 800; color: #4C1D95; margin-bottom: 0.25rem;">
+                    Enterprise Data Export & CSV Hub
+                  </h3>
+                  <p class="text-muted" style="font-size: 0.875rem; max-width: 680px; line-height: 1.5;">
+                    Download production-grade CSV datasets formatted with UTF-8 BOM encoding for direct import into Microsoft Excel, Google Sheets, Power BI, Python Pandas, and Tableau.
+                  </p>
+                </div>
+
+                <div class="flex items-center gap-2" style="width: 100%; max-width: 100%;">
+                  <button class="btn btn-primary" id="btn-export-all-datasets" style="background: #7C3AED; border-color: #6D28D9; white-space: normal; text-align: center;">
+                    <i class="fa-solid fa-cloud-arrow-down"></i> Download Master CSV Archive
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quick Metrics Row -->
+              <div class="grid grid-cols-4 gap-4" style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid #EDE9FE;">
+                <div>
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 600;">Total Datasets</div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: #581C87;">7 Datasets</div>
+                </div>
+                <div>
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 600;">Format Standard</div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: #059669;">RFC 4180 (UTF-8)</div>
+                </div>
+                <div>
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 600;">Database Engine</div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: #2563EB;">PostgreSQL / Supabase</div>
+                </div>
+                <div>
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 600;">Export Speed</div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: #D97706;">Instant Streaming</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dataset Search & Filter Bar -->
+          <div class="flex items-center justify-between flex-wrap gap-3" style="margin-bottom: 1.25rem;">
+            <div class="input-with-icon" style="flex: 1 1 200px; width: 100%;">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="csv-search-filter" class="form-input" placeholder="Search datasets by table, column, domain..." style="width: 100%;">
+            </div>
+
+            <div style="flex: 1 1 140px; width: 100%;">
+              <select id="csv-domain-filter" class="form-select" style="font-size: 0.8125rem; width: 100%;">
+                <option value="all">All Domains (7)</option>
+                <option value="accounts">Accounts & Users</option>
+                <option value="operations">Fulfillment & Subscriptions</option>
+                <option value="financials">Financials & Settlements</option>
+                <option value="compliance">Quality & Compliance</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- CSV DATASETS GRID -->
+          <div class="csv-export-grid" id="csv-datasets-grid">
+            
+            <!-- Dataset 1: Users & Profiles -->
+            <div class="csv-dataset-card" data-domain="accounts" data-name="users customer partner admin profiles">
+              <div>
+                <div class="csv-card-header">
+                  <div class="flex items-center gap-3">
+                    <div class="csv-icon-box" style="background: #EFF6FF; color: #2563EB;">
+                      <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                      <h4 class="csv-dataset-title">User Accounts Directory</h4>
+                      <span class="badge badge-primary" style="font-size: 0.68rem;">customer_profiles • partner_profiles</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="csv-dataset-desc">
+                  Master registry of all customers, registered dairy farmers, and administrators including emails, phone numbers, and timestamps.
+                </p>
+                <div class="csv-schema-tags">
+                  <span class="csv-column-tag">user_id</span>
+                  <span class="csv-column-tag">full_name</span>
+                  <span class="csv-column-tag">email</span>
+                  <span class="csv-column-tag">phone</span>
+                  <span class="csv-column-tag">role</span>
+                  <span class="csv-column-tag">status</span>
+                  <span class="csv-column-tag">created_at</span>
+                </div>
+              </div>
+              <div class="csv-card-footer">
+                <div class="csv-meta-info">
+                  <span class="csv-record-count" id="csv-count-users"><i class="fa-solid fa-table-cells"></i> Dynamic Live Rows</span>
+                  <span class="csv-file-format">CSV • UTF-8 • Excel Ready</span>
+                </div>
+                <div class="csv-btn-group">
+                  <button class="btn btn-secondary btn-sm" onclick="previewDataset('users', 'User Accounts Directory')" title="Preview sample data">
+                    <i class="fa-solid fa-eye"></i> Preview
+                  </button>
+                  <button class="btn btn-primary btn-sm" onclick="downloadDataset('users')" title="Download CSV">
+                    <i class="fa-solid fa-download"></i> CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dataset 2: Dairy Farms & Storefronts -->
+            <div class="csv-dataset-card" data-domain="operations" data-name="dairies farm gaushala fssai location radius">
+              <div>
+                <div class="csv-card-header">
+                  <div class="flex items-center gap-3">
+                    <div class="csv-icon-box" style="background: #F0FDF4; color: #16A34A;">
+                      <i class="fa-solid fa-store"></i>
+                    </div>
+                    <div>
+                      <h4 class="csv-dataset-title">Dairy Farms & Storefronts</h4>
+                      <span class="badge badge-success" style="font-size: 0.68rem;">dairies table</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="csv-dataset-desc">
+                  Full list of certified dairy farms, GPS coordinates (Lat/Lng), delivery radius, FSSAI licenses, ratings, and approval states.
+                </p>
+                <div class="csv-schema-tags">
+                  <span class="csv-column-tag">dairy_id</span>
+                  <span class="csv-column-tag">farm_name</span>
+                  <span class="csv-column-tag">owner_name</span>
+                  <span class="csv-column-tag">latitude</span>
+                  <span class="csv-column-tag">longitude</span>
+                  <span class="csv-column-tag">delivery_radius_km</span>
+                  <span class="csv-column-tag">fssai_license</span>
+                  <span class="csv-column-tag">is_approved</span>
+                </div>
+              </div>
+              <div class="csv-card-footer">
+                <div class="csv-meta-info">
+                  <span class="csv-record-count" id="csv-count-dairies"><i class="fa-solid fa-table-cells"></i> Verified Dairies</span>
+                  <span class="csv-file-format">CSV • UTF-8 • Excel Ready</span>
+                </div>
+                <div class="csv-btn-group">
+                  <button class="btn btn-secondary btn-sm" onclick="previewDataset('dairies', 'Dairy Farms & Storefronts')">
+                    <i class="fa-solid fa-eye"></i> Preview
+                  </button>
+                  <button class="btn btn-primary btn-sm" onclick="downloadDataset('dairies')">
+                    <i class="fa-solid fa-download"></i> CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dataset 3: Milk Products Catalog -->
+            <div class="csv-dataset-card" data-domain="operations" data-name="products milk catalog pricing fat snf">
+              <div>
+                <div class="csv-card-header">
+                  <div class="flex items-center gap-3">
+                    <div class="csv-icon-box" style="background: #FFFBEB; color: #D97706;">
+                      <i class="fa-solid fa-bottle-droplet"></i>
+                    </div>
+                    <div>
+                      <h4 class="csv-dataset-title">Milk Products & Pricing</h4>
+                      <span class="badge badge-warning" style="font-size: 0.68rem;">products table</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="csv-dataset-desc">
+                  Inventory of pure Cow, Buffalo, and A2 Gir milk variants with prices (₹/L), Fat %, SNF %, and live stock status.
+                </p>
+                <div class="csv-schema-tags">
+                  <span class="csv-column-tag">product_id</span>
+                  <span class="csv-column-tag">dairy_name</span>
+                  <span class="csv-column-tag">product_name</span>
+                  <span class="csv-column-tag">price_per_unit_inr</span>
+                  <span class="csv-column-tag">fat_percentage</span>
+                  <span class="csv-column-tag">snf_percentage</span>
+                  <span class="csv-column-tag">is_available</span>
+                </div>
+              </div>
+              <div class="csv-card-footer">
+                <div class="csv-meta-info">
+                  <span class="csv-record-count"><i class="fa-solid fa-table-cells"></i> Active SKUs</span>
+                  <span class="csv-file-format">CSV • UTF-8 • Excel Ready</span>
+                </div>
+                <div class="csv-btn-group">
+                  <button class="btn btn-secondary btn-sm" onclick="previewDataset('products', 'Milk Products & Pricing')">
+                    <i class="fa-solid fa-eye"></i> Preview
+                  </button>
+                  <button class="btn btn-primary btn-sm" onclick="downloadDataset('products')">
+                    <i class="fa-solid fa-download"></i> CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dataset 4: Active & Historical Subscriptions -->
+            <div class="csv-dataset-card" data-domain="operations" data-name="subscriptions customer daily slot recurring">
+              <div>
+                <div class="csv-card-header">
+                  <div class="flex items-center gap-3">
+                    <div class="csv-icon-box" style="background: #F5F3FF; color: #7C3AED;">
+                      <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <div>
+                      <h4 class="csv-dataset-title">Customer Subscriptions</h4>
+                      <span class="badge" style="background: #EDE9FE; color: #6D28D9; font-size: 0.68rem;">subscriptions table</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="csv-dataset-desc">
+                  Detailed subscription contracts including morning/evening slots, recurring milk volume, gross revenue, and platform fee splits.
+                </p>
+                <div class="csv-schema-tags">
+                  <span class="csv-column-tag">subscription_id</span>
+                  <span class="csv-column-tag">customer_name</span>
+                  <span class="csv-column-tag">dairy_name</span>
+                  <span class="csv-column-tag">quantity_litres</span>
+                  <span class="csv-column-tag">delivery_slot</span>
+                  <span class="csv-column-tag">monthly_gross_inr</span>
+                  <span class="csv-column-tag">platform_fee_inr</span>
+                  <span class="csv-column-tag">partner_net_inr</span>
+                </div>
+              </div>
+              <div class="csv-card-footer">
+                <div class="csv-meta-info">
+                  <span class="csv-record-count"><i class="fa-solid fa-table-cells"></i> Active Contracts</span>
+                  <span class="csv-file-format">CSV • UTF-8 • Excel Ready</span>
+                </div>
+                <div class="csv-btn-group">
+                  <button class="btn btn-secondary btn-sm" onclick="previewDataset('subscriptions', 'Customer Subscriptions')">
+                    <i class="fa-solid fa-eye"></i> Preview
+                  </button>
+                  <button class="btn btn-primary btn-sm" onclick="downloadDataset('subscriptions')">
+                    <i class="fa-solid fa-download"></i> CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dataset 5: Daily Orders & Fulfillment -->
+            <div class="csv-dataset-card" data-domain="operations" data-name="orders daily deliveries bottle fulfillment otp">
+              <div>
+                <div class="csv-card-header">
+                  <div class="flex items-center gap-3">
+                    <div class="csv-icon-box" style="background: #ECFDF5; color: #059669;">
+                      <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+                    <div>
+                      <h4 class="csv-dataset-title">Daily Orders & Fulfillment</h4>
+                      <span class="badge badge-success" style="font-size: 0.68rem;">orders table</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="csv-dataset-desc">
+                  Daily delivery records for morning (5:30 AM) and evening (5:30 PM) dispatch runs, OTP verifications, and delivery statuses.
+                </p>
+                <div class="csv-schema-tags">
+                  <span class="csv-column-tag">order_id</span>
+                  <span class="csv-column-tag">delivery_date</span>
+                  <span class="csv-column-tag">customer_name</span>
+                  <span class="csv-column-tag">dairy_name</span>
+                  <span class="csv-column-tag">slot</span>
+                  <span class="csv-column-tag">quantity_litres</span>
+                  <span class="csv-column-tag">delivery_status</span>
+                  <span class="csv-column-tag">otp_verified</span>
+                </div>
+              </div>
+              <div class="csv-card-footer">
+                <div class="csv-meta-info">
+                  <span class="csv-record-count"><i class="fa-solid fa-table-cells"></i> Daily Logs</span>
+                  <span class="csv-file-format">CSV • UTF-8 • Excel Ready</span>
+                </div>
+                <div class="csv-btn-group">
+                  <button class="btn btn-secondary btn-sm" onclick="previewDataset('orders', 'Daily Orders & Fulfillment')">
+                    <i class="fa-solid fa-eye"></i> Preview
+                  </button>
+                  <button class="btn btn-primary btn-sm" onclick="downloadDataset('orders')">
+                    <i class="fa-solid fa-download"></i> CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dataset 6: Financial Revenue & Settlements -->
+            <div class="csv-dataset-card" data-domain="financials" data-name="financials revenue payout platform fee settlement razorpay gmv">
+              <div>
+                <div class="csv-card-header">
+                  <div class="flex items-center gap-3">
+                    <div class="csv-icon-box" style="background: #FEF3C7; color: #B45309;">
+                      <i class="fa-solid fa-coins"></i>
+                    </div>
+                    <div>
+                      <h4 class="csv-dataset-title">Financial Revenue & Settlements</h4>
+                      <span class="badge badge-warning" style="font-size: 0.68rem;">financials ledger</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="csv-dataset-desc">
+                  Platform fee breakdown (₹50/sub), Gross Marketplace Volume (GMV), Razorpay Route partner disbursements, and settlement audit log.
+                </p>
+                <div class="csv-schema-tags">
+                  <span class="csv-column-tag">payout_batch_id</span>
+                  <span class="csv-column-tag">dairy_name</span>
+                  <span class="csv-column-tag">subscription_id</span>
+                  <span class="csv-column-tag">monthly_gross_volume_inr</span>
+                  <span class="csv-column-tag">platform_fee_deducted_inr</span>
+                  <span class="csv-column-tag">partner_net_payable_inr</span>
+                  <span class="csv-column-tag">status</span>
+                </div>
+              </div>
+              <div class="csv-card-footer">
+                <div class="csv-meta-info">
+                  <span class="csv-record-count"><i class="fa-solid fa-table-cells"></i> Revenue Ledger</span>
+                  <span class="csv-file-format">CSV • UTF-8 • Excel Ready</span>
+                </div>
+                <div class="csv-btn-group">
+                  <button class="btn btn-secondary btn-sm" onclick="previewDataset('financials', 'Financial Revenue & Settlements')">
+                    <i class="fa-solid fa-eye"></i> Preview
+                  </button>
+                  <button class="btn btn-primary btn-sm" onclick="downloadDataset('financials')">
+                    <i class="fa-solid fa-download"></i> CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dataset 7: Customer Disputes & Support -->
+            <div class="csv-dataset-card" data-domain="compliance" data-name="disputes complaints tickets quality support feedback">
+              <div>
+                <div class="csv-card-header">
+                  <div class="flex items-center gap-3">
+                    <div class="csv-icon-box" style="background: #FEE2E2; color: #DC2626;">
+                      <i class="fa-solid fa-scale-balanced"></i>
+                    </div>
+                    <div>
+                      <h4 class="csv-dataset-title">Customer Disputes & Tickets</h4>
+                      <span class="badge badge-danger" style="font-size: 0.68rem;">complaints table</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="csv-dataset-desc">
+                  Complete historical record of customer support tickets, delivery quality issues, dispute resolutions, and admin investigation notes.
+                </p>
+                <div class="csv-schema-tags">
+                  <span class="csv-column-tag">ticket_id</span>
+                  <span class="csv-column-tag">customer_name</span>
+                  <span class="csv-column-tag">dairy_name</span>
+                  <span class="csv-column-tag">issue_type</span>
+                  <span class="csv-column-tag">status</span>
+                  <span class="csv-column-tag">description</span>
+                  <span class="csv-column-tag">resolution_notes</span>
+                </div>
+              </div>
+              <div class="csv-card-footer">
+                <div class="csv-meta-info">
+                  <span class="csv-record-count"><i class="fa-solid fa-table-cells"></i> Dispute Tickets</span>
+                  <span class="csv-file-format">CSV • UTF-8 • Excel Ready</span>
+                </div>
+                <div class="csv-btn-group">
+                  <button class="btn btn-secondary btn-sm" onclick="previewDataset('disputes', 'Customer Disputes & Tickets')">
+                    <i class="fa-solid fa-eye"></i> Preview
+                  </button>
+                  <button class="btn btn-primary btn-sm" onclick="downloadDataset('disputes')">
+                    <i class="fa-solid fa-download"></i> CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: CERTIFICATE VIEWER / INSPECTOR FOR ADMIN -->
+  <div class="modal-overlay" id="cert-viewer-modal">
+    <div class="modal-container" style="max-width: 820px;">
+      <div class="modal-header">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-file-shield" style="color: #7C3AED; font-size: 1.25rem;"></i>
+          <h3 class="modal-title" id="cert-modal-title">Admin Certificate Audit & Inspection</h3>
+        </div>
+        <button class="modal-close-btn" onclick="Modal.close('cert-viewer-modal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 1.25rem;">
+        <div class="cert-preview-frame-wrap" id="cert-viewer-frame-container">
+          <!-- Injected via JS (iframe or img) -->
+        </div>
+        <div class="cert-verify-grid">
+          <div class="cert-verify-item">
+            <i class="fa-solid fa-circle-check" style="color: #7C3AED;"></i>
+            <div>
+              <div style="font-weight: 700; font-size: 0.8125rem;">FSSAI Compliance</div>
+              <div class="text-muted" style="font-size: 0.75rem;">Verified Gov License</div>
+            </div>
+          </div>
+          <div class="cert-verify-item">
+            <i class="fa-solid fa-award" style="color: #7C3AED;"></i>
+            <div>
+              <div style="font-weight: 700; font-size: 0.8125rem;">Quality & Purity</div>
+              <div class="text-muted" style="font-size: 0.75rem;">Adulteration Free</div>
+            </div>
+          </div>
+          <div class="cert-verify-item">
+            <i class="fa-solid fa-shield-halved" style="color: #7C3AED;"></i>
+            <div>
+              <div style="font-weight: 700; font-size: 0.8125rem;">Admin Approval</div>
+              <div class="text-muted" style="font-size: 0.75rem;">Verified Partner</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a id="btn-cert-download" href="#" target="_blank" download class="btn btn-secondary btn-sm">
+          <i class="fa-solid fa-download"></i> Download Document
+        </a>
+        <button class="btn btn-primary btn-sm" onclick="Modal.close('cert-viewer-modal')">Done Auditing</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DATASET SAMPLE PREVIEWER -->
+  <div class="modal-overlay" id="csv-preview-modal">
+    <div class="modal-container" style="max-width: 920px;">
+      <div class="modal-header">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-table" style="color: #7C3AED; font-size: 1.25rem;"></i>
+          <div>
+            <h3 class="modal-title" id="csv-preview-title">Dataset Live Preview</h3>
+            <p class="text-muted" id="csv-preview-subtitle" style="font-size: 0.78rem; margin: 0;">Showing sample top rows before download</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="Modal.close('csv-preview-modal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 1.25rem;">
+        <div class="flex items-center justify-between gap-2" style="margin-bottom: 0.85rem;">
+          <span class="badge badge-primary" id="csv-preview-row-count">0 Records Loaded</span>
+          <span class="text-muted" style="font-size: 0.78rem;"><i class="fa-solid fa-circle-info"></i> Formatted as RFC 4180 CSV with UTF-8 BOM</span>
+        </div>
+        
+        <div class="csv-preview-table-wrap" id="csv-preview-table-container">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+      <div class="modal-footer flex items-center justify-between">
+        <button class="btn btn-secondary btn-sm" onclick="Modal.close('csv-preview-modal')">Close Preview</button>
+        <button class="btn btn-primary btn-sm" id="btn-csv-modal-download" style="background: #7C3AED; border-color: #6D28D9;">
+          <i class="fa-solid fa-download"></i> Download CSV File
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADMIN DIRECT MESSAGE / START NEW TICKET -->
+  <div class="modal-overlay" id="modal-admin-new-ticket">
+    <div class="modal-container" style="max-width: 580px;">
+      <div class="modal-header">
+        <div class="flex items-center gap-2">
+          <div class="stat-icon-wrap" style="width: 34px; height: 34px; font-size: 0.95rem; background: #EEF2FF; color: var(--theme-primary);">
+            <i class="fa-solid fa-paper-plane"></i>
+          </div>
+          <div>
+            <h3 class="modal-title" style="margin-bottom: 0;">Start Direct Support Conversation</h3>
+            <p class="text-muted" style="font-size: 0.78rem; margin: 0;">Send an official message or open a ticket with a Partner or Customer</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="Modal.close('modal-admin-new-ticket')">&times;</button>
+      </div>
+      <form id="form-admin-start-ticket">
+        <div class="modal-body" style="padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 0.8125rem;">Recipient Type <span style="color: var(--color-danger);">*</span></label>
+              <select id="admin-new-recipient-type" class="form-select" required>
+                <option value="partner">🥛 Dairy Partner</option>
+                <option value="customer">👥 Customer</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 0.8125rem;">Select User / Business <span style="color: var(--color-danger);">*</span></label>
+              <select id="admin-new-recipient-user" class="form-select" required>
+                <option value="">Loading contacts...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 0.8125rem;">Category</label>
+              <select id="admin-new-category" class="form-select">
+                <option value="general">General Support</option>
+                <option value="payout">Payouts & Platform Fees</option>
+                <option value="dispatch">Delivery & Logistics</option>
+                <option value="quality">Quality & Complaints</option>
+                <option value="verification">Storefront & FSSAI Verification</option>
+                <option value="technical">Technical Account Issue</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 0.8125rem;">Priority Level</label>
+              <select id="admin-new-priority" class="form-select">
+                <option value="medium">Medium Priority</option>
+                <option value="low">Low Priority</option>
+                <option value="high">High Priority</option>
+                <option value="urgent">⚡ Urgent Priority</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.8125rem;">Conversation Subject <span style="color: var(--color-danger);">*</span></label>
+            <input type="text" id="admin-new-subject" class="form-input" placeholder="e.g. Monthly Settlement Query / Milk Dispatch Notice" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.8125rem;">Initial Message <span style="color: var(--color-danger);">*</span></label>
+            <textarea id="admin-new-message" class="form-textarea" rows="3" placeholder="Write your message here... The user will receive an instant notification." required></textarea>
+          </div>
+
+        </div>
+        <div class="modal-footer flex items-center justify-between">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="Modal.close('modal-admin-new-ticket')">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="btn-admin-submit-new-ticket">
+            <i class="fa-solid fa-paper-plane"></i> Send & Open Ticket
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: RESOLVE TICKET WITH NOTES -->
+  <div class="modal-overlay" id="modal-admin-resolve-ticket">
+    <div class="modal-container" style="max-width: 500px;">
+      <div class="modal-header">
+        <div class="flex items-center gap-2">
+          <div class="stat-icon-wrap" style="width: 32px; height: 32px; font-size: 0.9rem; background: #DCFCE7; color: #16A34A;">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div>
+            <h3 class="modal-title" style="margin-bottom: 0;">Close & Resolve Ticket</h3>
+            <span class="text-muted" style="font-size: 0.78rem;" id="resolve-modal-ticket-num">TKT-1001</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="Modal.close('modal-admin-resolve-ticket')">&times;</button>
+      </div>
+      <form id="form-admin-resolve-ticket">
+        <div class="modal-body" style="padding: 1.25rem;">
+          <input type="hidden" id="resolve-ticket-id" value="">
+          
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.8125rem;">Final Status</label>
+            <select id="resolve-status-select" class="form-select">
+              <option value="resolved">✓ Mark as Resolved</option>
+              <option value="closed">✕ Close Ticket (No Action Required)</option>
+              <option value="in_progress">⏳ In Progress / Investigating</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.8125rem;">Resolution Summary Notes</label>
+            <textarea id="resolve-notes-text" class="form-textarea" rows="3" placeholder="Describe the resolution (e.g. Refund issued, dairy instructed for morning delivery, FSSAI reviewed)..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer flex items-center justify-between">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="Modal.close('modal-admin-resolve-ticket')">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="btn-submit-resolve-notes" style="background: #16A34A; border-color: #16A34A;">
+            <i class="fa-solid fa-check"></i> Confirm Resolution
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sidebar Backdrop Overlay -->
+  <div class="sidebar-backdrop-overlay" data-action="close-sidebar"></div>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav">
+    <button class="mobile-bottom-nav-item active" data-tab="overview">
+      <i class="fa-solid fa-chart-pie"></i>
+      <span>Overview</span>
+    </button>
+    <button class="mobile-bottom-nav-item" data-tab="vetting">
+      <i class="fa-solid fa-user-check"></i>
+      <span>Vetting</span>
+    </button>
+    <button class="mobile-bottom-nav-item" data-tab="dairies">
+      <i class="fa-solid fa-store"></i>
+      <span>Dairies</span>
+    </button>
+    <button class="mobile-bottom-nav-item" data-tab="disputes">
+      <i class="fa-solid fa-headset"></i>
+      <span>Helpdesk</span>
+    </button>
+    <button class="mobile-bottom-nav-item" data-tab="settings">
+      <i class="fa-solid fa-gear"></i>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/translator.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

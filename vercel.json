@@ -1,0 +1,15 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/partner", "destination": "/frontend/partner-dashboard.html" },
+    { "source": "/customer", "destination": "/frontend/customer-dashboard.html" },
+    { "source": "/admin", "destination": "/frontend/admin-dashboard.html" },
+    { "source": "/auth", "destination": "/frontend/auth.html" },
+    { "source": "/dairy/:id", "destination": "/frontend/dairy.html" },
+    { "source": "/css/:path*", "destination": "/frontend/css/:path*" },
+    { "source": "/js/:path*", "destination": "/frontend/js/:path*" },
+    { "source": "/img/:path*", "destination": "/frontend/img/:path*" },
+    { "source": "/", "destination": "/frontend/index.html" },
+    { "source": "/:path*", "destination": "/frontend/:path*" }
+  ]
+}
