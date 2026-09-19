@@ -10,5 +10,5 @@
 window.APP_CONFIG = {
   // Set your deployed Render Backend URL here:
   // Example: 'https://neardairy-backend.onrender.com'
-  BACKEND_URL: '',
+  BACKEND_URL: 'https://near-dairy.onrender.com',
 };
