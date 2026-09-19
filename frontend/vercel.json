@@ -1,6 +1,7 @@
 {
   "cleanUrls": true,
   "rewrites": [
+    { "source": "/api/:path*", "destination": "https://near-dairy.onrender.com/api/:path*" },
     { "source": "/partner", "destination": "/partner-dashboard.html" },
     { "source": "/customer", "destination": "/customer-dashboard.html" },
     { "source": "/admin", "destination": "/admin-dashboard.html" },
